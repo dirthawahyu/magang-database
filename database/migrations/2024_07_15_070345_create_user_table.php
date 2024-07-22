@@ -19,13 +19,13 @@ class CreateUserTable extends Migration
             $table->string('phone_number');
             $table->string('email');
             $table->string('password');
-            $table->tinyInteger('gender'); // 0 = Tidak Diketahui, 1 = Perempuan, 2 = Laki Laki
+            $table->enum('gender_status', ['Tidak Diketahui', 'Laki-Laki', 'Perempuan'])->default('Tidak Diketahui');
             $table->text('profile_photo')->nullable();
             $table->text('ktp_photo')->nullable();
             $table->integer('no_rekening');
             $table->string('blacklist_reason')->nullable();
             $table->integer('block_date')->nullable();
-            $table->tinyInteger('marital_status'); // 0 = Lajang, 1 = Menikah, 2 = Cerai
+            $table->enum('marital_status', ['Lajang', 'Menikah', 'Cerai'])->default('lajang');
             $table->timestamps();
         });
     }

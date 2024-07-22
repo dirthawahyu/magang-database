@@ -10,18 +10,28 @@ class CreateLeaveTable extends Migration
     {
         Schema::create('leave', function (Blueprint $table) {
             $table->id();
-            $table->integer('id_user');
-            $table->integer('id_category');
+            $table->unsignedBigInteger('id_user');
+            $table->unsignedBigInteger('id_master_category');
             $table->string('reason_for_leave');
             $table->date('start_date');
             $table->date('end_date');
-            $table->tinyInteger('status'); // 0 = Pending, 1 = Approved, 2 = Declined, 3 = Canceled
+            $table->enum('status', ['Pending', 'Approved', 'Declined', 'Canceled'])->default('Pending');
             $table->timestamps();
+
+            // Add foreign key constraints
+            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('id_master_category')->references('id')->on('master_category')->onDelete('cascade');
         });
     }
 
     public function down()
     {
+        Schema::table('leave', function (Blueprint $table) {
+            // Drop foreign key constraints
+            $table->dropForeign(['id_user']);
+            $table->dropForeign(['id_category']);
+        });
+
         Schema::dropIfExists('leave');
     }
 }

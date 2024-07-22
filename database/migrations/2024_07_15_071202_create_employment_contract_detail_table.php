@@ -10,10 +10,12 @@ class CreateEmploymentContractDetailTable extends Migration
     {
         Schema::create('employment_contract_detail', function (Blueprint $table) {
             $table->id('id_employment_contract_detail');
-            $table->integer('id_employment_contract');
-            $table->integer('id_salary_category');
+            $table->unsignedBigInteger('id_employment_contract');
+            $table->unsignedBigInteger('id_master_category');
             $table->integer('nominal');
             $table->timestamps();
+            $table->foreign('id_employment_contract')->references('id')->on('employment_contracts')->onDelete('cascade');
+            $table->foreign('id_master_category')->references('id')->on('master_category')->onDelete('cascade');
         });
     }
 

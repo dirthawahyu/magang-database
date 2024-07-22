@@ -10,10 +10,11 @@ class CreatePlanningRealizationLineTable extends Migration
     {
         Schema::create('planning_realization_line', function (Blueprint $table) {
             $table->id();
-            $table->integer('id_planning_realization');
+            $table->unsignedBigInteger('id_planning_realization');
             $table->text('photo_proof');
             $table->string('keterangan');
             $table->timestamps();
+            $table->foreign('id_planning_realization')->references('id')->on('planning_realization')->onDelete('cascade');
         });
     }
 

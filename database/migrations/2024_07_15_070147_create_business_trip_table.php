@@ -10,10 +10,10 @@ class CreateBusinessTripTable extends Migration
     {
         Schema::create('business_trip', function (Blueprint $table) {
             $table->id('id_business_trip');
+            $table->unsignedBigInteger('id_company');
             $table->string('note');
             $table->text('photo_document');
-            $table->tinyInteger('status'); // 0 = Draft, 1 = On Progress, 2 = Completed, 3 = Canceled
-            $table->integer('company');
+            $table->enum('status', ['Draft', 'On Progress', 'Completed', 'Canceled'])->default('Draft');
             $table->integer('phone_number');
             $table->date('start_date');
             $table->date('end_date');
@@ -21,6 +21,7 @@ class CreateBusinessTripTable extends Migration
             $table->string('pic_company');
             $table->string('pic_role');
             $table->timestamps();
+            $table->foreign('id_company')->references('id')->on('company')->onDelete('cascade');
         });
     }
 

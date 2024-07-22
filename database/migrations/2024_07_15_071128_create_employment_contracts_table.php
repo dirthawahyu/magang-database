@@ -10,15 +10,20 @@ class CreateEmploymentContractsTable extends Migration
     {
         Schema::create('employment_contracts', function (Blueprint $table) {
             $table->id('id_employment_contracts');
-            $table->integer('id_company');
-            $table->integer('id_employee_group');
-            $table->integer('id_user');
-            $table->integer('id_position');
+            $table->unsignedBigInteger('id_company');
+            $table->unsignedBigInteger('id_employee_group');
+            $table->unsignedBigInteger('id_user');
+            $table->unsignedBigInteger('id_position');
             $table->string('status_employee');
             $table->date('start_date');
             $table->date('end_date');
-            $table->tinyInteger('status'); // 0 = Magang, 1 = Kontrak, 2 = Full Time, 3 = Freelance
+            $table->enum('status', ['Magang', 'Kontrak', 'Full time', 'Canceled'])->default('Magang');
             $table->timestamps();
+            $table->foreign('id_company')->references('id')->on('company')->onDelete('cascade');
+            $table->foreign('id_employee_group')->references('id')->on('employee_group')->onDelete('cascade');
+            $table->foreign('id_user')->references('id')->on('user')->onDelete('cascade');
+            $table->foreign('id_position')->references('id')->on('position')->onDelete('cascade');
+
         });
     }
 

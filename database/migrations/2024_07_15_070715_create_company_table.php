@@ -10,11 +10,12 @@ class CreateCompanyTable extends Migration
     {
         Schema::create('company', function (Blueprint $table) {
             $table->id();
-            $table->integer('id_pic');
+            $table->string('pic');
             $table->string('company');
             $table->string('city');
             $table->string('address');
             $table->timestamps();
+            
         });
     }
 

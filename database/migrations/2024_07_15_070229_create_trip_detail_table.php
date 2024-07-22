@@ -10,9 +10,11 @@ class CreateTripDetailTable extends Migration
     {
         Schema::create('trip_detail', function (Blueprint $table) {
             $table->id();
-            $table->integer('id_user');
-            $table->integer('id_business_trip');
+            $table->unsignedBigInteger('id_user');
+            $table->unsignedBigInteger('id_business_trip');
             $table->timestamps();
+            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('id_business_trip')->references('id')->on('business_trip')->onDelete('cascade');
         });
     }
 

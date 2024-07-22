@@ -10,15 +10,20 @@ class CreateEmployeeTable extends Migration
     {
         Schema::create('employee', function (Blueprint $table) {
             $table->id();
-            $table->integer('id_user');
-            $table->integer('id_role');
-            $table->integer('id_employee_group');
-            $table->integer('id_position');
-            $table->integer('id_company');
-            $table->tinyInteger('status'); // 0 = Active, 1 = Not Active
-            $table->enum('id_tax_status', ['status1', 'status2']); // Replace with actual status values
+            $table->unsignedBigInteger('id_user');
+            $table->unsignedBigInteger('id_role');
+            $table->unsignedBigInteger('id_employee_group');
+            $table->unsignedBigInteger('id_position');
+            $table->unsignedBigInteger('id_company');
+            $table->enum('status', ['Active', 'Not Active'])->default('Not Active');
+            $table->enum('tax_status', ['status1', 'status2']); // Replace with actual status values
             $table->integer('nip');
             $table->timestamps();
+            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('id_role')->references('id')->on('role')->onDelete('cascade');
+            $table->foreign('id_employee_group')->references('id')->on('employee_group')->onDelete('cascade');
+            $table->foreign('id_position')->references('id')->on('position')->onDelete('cascade');
+            $table->foreign('id_company')->references('id')->on('company                ')->onDelete('cascade');
         });
     }
 
