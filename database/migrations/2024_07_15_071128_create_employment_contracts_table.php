@@ -9,7 +9,7 @@ class CreateEmploymentContractsTable extends Migration
     public function up()
     {
         Schema::create('employment_contracts', function (Blueprint $table) {
-            $table->id('id_employment_contracts');
+            $table->id();
             $table->unsignedBigInteger('id_company');
             $table->unsignedBigInteger('id_employee_group');
             $table->unsignedBigInteger('id_user');

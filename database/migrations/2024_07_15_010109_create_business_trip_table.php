@@ -9,7 +9,7 @@ class CreateBusinessTripTable extends Migration
     public function up()
     {
         Schema::create('business_trip', function (Blueprint $table) {
-            $table->id('id_business_trip');
+            $table->id();
             $table->unsignedBigInteger('id_company');
             $table->string('note');
             $table->text('photo_document');

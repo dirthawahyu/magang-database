@@ -23,7 +23,7 @@ class CreateEmployeeTable extends Migration
             $table->foreign('id_role')->references('id')->on('role')->onDelete('cascade');
             $table->foreign('id_employee_group')->references('id')->on('employee_group')->onDelete('cascade');
             $table->foreign('id_position')->references('id')->on('position')->onDelete('cascade');
-            $table->foreign('id_company')->references('id')->on('company                ')->onDelete('cascade');
+            $table->foreign('id_company')->references('id')->on('company')->onDelete('cascade');
         });
     }
 

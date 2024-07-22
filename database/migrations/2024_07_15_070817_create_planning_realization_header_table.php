@@ -9,7 +9,7 @@ class CreatePlanningRealizationHeaderTable extends Migration
     public function up()
     {
         Schema::create('planning_realization_header', function (Blueprint $table) {
-            $table->id('id_planning_realization');
+            $table->id();
             $table->unsignedBigInteger('id_business_trip');
             $table->unsignedBigInteger('id_master_category');
             $table->string('keterangan');
