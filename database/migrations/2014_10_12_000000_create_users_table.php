@@ -14,9 +14,22 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->integer('nik')->nullable();
+            $table->string('city')->nullable();
+            $table->string('address')->nullable();
+            $table->string('religion')->nullable();
+            $table->date('birth_date')->nullable();
+            $table->string('phone_number')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('gender_status', ['Tidak Diketahui', 'Laki-Laki', 'Perempuan'])->default('Tidak Diketahui');
+            $table->text('profile_photo')->nullable();
+            $table->text('ktp_photo')->nullable();
+            $table->integer('no_rekening')->nullable();
+            $table->string('blacklist_reason')->nullable();
+            $table->integer('block_date')->nullable();
+            $table->enum('marital_status', ['Lajang', 'Menikah', 'Cerai'])->default('lajang');
             $table->rememberToken();
             $table->timestamps();
         });
