@@ -23,6 +23,7 @@ class RegisterController extends Controller
         $register = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'profile_photo' => "http://127.0.0.1:8000/storage/kucing1.jpeg",
             'password' => Hash::make($request->password),
         ]);
 

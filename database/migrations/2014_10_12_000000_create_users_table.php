@@ -24,7 +24,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('gender_status', ['Tidak Diketahui', 'Laki-Laki', 'Perempuan'])->default('Tidak Diketahui');
-            $table->text('profile_photo')->nullable();
+            $table->text('profile_photo');
             $table->text('ktp_photo')->nullable();
             $table->integer('no_rekening')->nullable();
             $table->string('blacklist_reason')->nullable();

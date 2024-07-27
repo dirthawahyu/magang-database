@@ -21,7 +21,7 @@ class CreateEmploymentContractsTable extends Migration
             $table->timestamps();
             $table->foreign('id_company')->references('id')->on('company')->onDelete('cascade');
             $table->foreign('id_employee_group')->references('id')->on('employee_group')->onDelete('cascade');
-            $table->foreign('id_user')->references('id')->on('user')->onDelete('cascade');
+            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('id_position')->references('id')->on('position')->onDelete('cascade');
 
         });
