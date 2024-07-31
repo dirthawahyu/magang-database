@@ -16,7 +16,7 @@ class CreateEmployeeTable extends Migration
             $table->unsignedBigInteger('id_position');
             $table->unsignedBigInteger('id_company');
             $table->enum('status', ['Active', 'Not Active'])->default('Not Active');
-            $table->enum('tax_status', ['status1', 'status2']); // Replace with actual status values
+            $table->enum('tax_status', ['Active', 'Not Active'])->default('Not Active'); // Replace with actual status values
             $table->integer('nip');
             $table->timestamps();
             $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');

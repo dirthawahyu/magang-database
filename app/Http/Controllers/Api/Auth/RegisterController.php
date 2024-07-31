@@ -15,13 +15,15 @@ class RegisterController extends Controller
     public function __invoke(Request $request)
     {
         $request->validate([
-            'name' => ['required', 'min:3'],
+            'first_name' => ['required', 'min:3'],
+            'last_name' => ['required', 'min:3'],
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'min:8'],
         ]);
 
         $register = User::create([
-            'name' => $request->name,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
             'email' => $request->email,
             'profile_photo' => "http://127.0.0.1:8000/storage/kucing1.jpeg",
             'password' => Hash::make($request->password),
