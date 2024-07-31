@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\App\LoginController;
+use App\Http\Controllers\Api\App\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,4 +27,6 @@ Route::post('app/login', [LoginController::class, 'loginApp']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('app/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('app/user', [LoginController::class, 'fetch'])->name('fetch');
+    Route::get('app/profile', [ProfileController::class, 'index']);
+    Route::get('app/profile/{id}', [ProfileController::class, 'show']);
 });

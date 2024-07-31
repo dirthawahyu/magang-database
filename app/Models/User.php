@@ -56,4 +56,9 @@ class User extends Authenticatable
         'birth_date' => 'date',
         'block_date' => 'datetime',
     ];
+
+    public function employee()
+    {
+        return $this->hasOne(Employee::class, 'id_user');
+    }
 }
