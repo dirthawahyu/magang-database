@@ -4,9 +4,10 @@
 namespace App\Http\Controllers\Api\App;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\EmployeeGroup;
+use App\Models\Position;
 use App\Models\Role;
-use Illuminate\Http\Request;
+use App\Models\User;
 
 class ProfileController extends Controller
 {
@@ -45,6 +46,8 @@ class ProfileController extends Controller
         }
 
         $roleName = $user->employee ? Role::find($user->employee->id_role)->name : null;
+        $employeeGroupName = $user->employee ? EmployeeGroup::find($user->employee->id_employee_group)->code : null;
+        $positionName = $user->employee ? Position::find($user->employee->id_position)->name : null;
 
         $profile = [
             'first_name' => $user->first_name,
@@ -56,8 +59,8 @@ class ProfileController extends Controller
             'email' => $user->email,
             'profile_photo' => $user->profile_photo,
             'role' => $roleName,
-            'employee_group' => $user->employee->id_employee_group,
-            'position' => $user->employee->id_position,
+            'employee_group' => $employeeGroupName,
+            'position' => $positionName,
             'nip' => $user->employee->nip
         ];
 
