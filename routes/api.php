@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\App\LoginController;
+use App\Http\Controllers\Api\App\PasswordController;
 use App\Http\Controllers\Api\App\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -29,4 +30,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/user', [LoginController::class, 'fetch'])->name('fetch');
     Route::get('app/profile', [ProfileController::class, 'index']);
     Route::get('app/profile/{id}', [ProfileController::class, 'show']);
+    Route::post('app/password', [PasswordController::class, 'changePassword'])->name('changePassword');
 });
