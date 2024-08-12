@@ -15,7 +15,6 @@ class Employee extends Model
         'id_user',
         'id_role',
         'id_employee_group',
-        'id_position',
         'id_company',
         'status',
         'tax_status',

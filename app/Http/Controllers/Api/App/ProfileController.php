@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\EmployeeGroup;
-use App\Models\Position;
 use App\Models\Role;
 use App\Models\User;
 
@@ -14,7 +13,7 @@ class ProfileController extends Controller
     public function index()
     {
         $profiles = User::with(['employee' => function ($query) {
-            $query->select('id', 'id_user', 'id_role', 'id_employee_group', 'id_position');
+            $query->select('id', 'id_user', 'id_role', 'id_employee_group');
         }])->get(['id', 'first_name', 'last_name', 'gender_status', 'religion', 'profile_photo']);
 
         $profiles = $profiles->map(function ($user) {
@@ -28,7 +27,6 @@ class ProfileController extends Controller
                 'profile_photo' => $user->profile_photo,
                 'role' => $roleName,
                 'employee_group' => $user->employee ? $user->employee->id_employee_group : null,
-                'position' => $user->employee ? $user->employee->id_position : null,
             ];
         });
 
@@ -38,7 +36,7 @@ class ProfileController extends Controller
     public function show($id)
     {
         $user = User::with(['employee' => function ($query) {
-            $query->select('id', 'id_user', 'id_role', 'id_employee_group', 'id_position', 'nip');
+            $query->select('id', 'id_user', 'id_role', 'id_employee_group', 'nip');
         }])->find($id, ['id', 'first_name', 'last_name', 'gender_status', 'religion', 'phone_number', 'address', 'email', 'profile_photo']);
 
         if (!$user) {
@@ -47,7 +45,6 @@ class ProfileController extends Controller
 
         $roleName = $user->employee ? Role::find($user->employee->id_role)->name : null;
         $employeeGroupName = $user->employee ? EmployeeGroup::find($user->employee->id_employee_group)->code : null;
-        $positionName = $user->employee ? Position::find($user->employee->id_position)->name : null;
 
         $profile = [
             'first_name' => $user->first_name,
@@ -60,7 +57,6 @@ class ProfileController extends Controller
             'profile_photo' => $user->profile_photo,
             'role' => $roleName,
             'employee_group' => $employeeGroupName,
-            'position' => $positionName,
             'nip' => $user->employee->nip
         ];
 
