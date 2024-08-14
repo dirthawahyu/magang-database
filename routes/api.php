@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\App\EditController;
+use App\Http\Controllers\Api\App\LoginController;
+use App\Http\Controllers\Api\App\PasswordController;
+use App\Http\Controllers\Api\App\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,4 +20,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::post('register', \App\Http\Controllers\Api\Auth\RegisterController::class);
+
+//API APP
+Route::post('app/login', [LoginController::class, 'loginApp']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('app/logout', [LoginController::class, 'logout'])->name('logout');
+    Route::get('app/user', [LoginController::class, 'fetch'])->name('fetch');
+    Route::get('app/profile', [ProfileController::class, 'index']);
+    Route::get('app/profile/{id}', [ProfileController::class, 'show']);
+    Route::post('app/password', [PasswordController::class, 'changePassword'])->name('changePassword');
+    Route::post('app/edit', [EditController::class, 'editProfile'])->name('editProfile');
 });

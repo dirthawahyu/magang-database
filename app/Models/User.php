@@ -24,9 +24,23 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
+        'nik',
+        'city',
+        'address',
+        'religion',
+        'birth_date',
+        'phone_number',
         'email',
         'password',
+        'gender_status',
+        'profile_photo',
+        'ktp_photo',
+        'no_rekening',
+        'blacklist_reason',
+        'block_date',
+        'marital_status',
     ];
 
     /**
@@ -48,8 +62,11 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'birth_date' => 'date',
+        'block_date' => 'datetime',
     ];
 
+<<<<<<< HEAD
     /**
      * The accessors to append to the model's array form.
      *
@@ -58,4 +75,10 @@ class User extends Authenticatable
     protected $appends = [
         'profile_photo_url',
     ];
+=======
+    public function employee()
+    {
+        return $this->hasOne(Employee::class, 'id_user');
+    }
+>>>>>>> 3ae8e38e1971f3ffb69637bc51df42ce0cd458a6
 }

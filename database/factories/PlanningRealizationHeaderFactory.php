@@ -17,7 +17,7 @@ class PlanningRealizationHeaderFactory extends Factory
     public function definition()
     {
         return [
-            'id_business_trip' => \App\Models\BusinessTrip::factory(),
+            'id_business_trip' => \App\Models\Businesstrip::factory(),
             'id_pengeluaran_kategori' => \App\Models\CategoryExpenditure::factory(),
             'keterangan' => $this->faker->sentence(),
             'nominal_planning' => $this->faker->randomNumber(5),
