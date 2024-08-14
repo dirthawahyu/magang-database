@@ -34,6 +34,8 @@ return new class extends Migration
             $table->integer('block_date')->nullable();
             $table->enum('marital_status', ['Lajang', 'Menikah', 'Cerai'])->default('lajang');
             $table->rememberToken();
+            $table->foreignId('current_team_id')->nullable();
+            $table->string('profile_photo_path', 2048)->nullable();
             $table->timestamps();
         });
         
