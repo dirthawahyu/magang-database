@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\App\ContractController;
 use App\Http\Controllers\Api\App\EditController;
 use App\Http\Controllers\Api\App\LoginController;
 use App\Http\Controllers\Api\App\PasswordController;
@@ -33,4 +34,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/profile/{id}', [ProfileController::class, 'show']);
     Route::post('app/password', [PasswordController::class, 'changePassword'])->name('changePassword');
     Route::post('app/edit', [EditController::class, 'editProfile'])->name('editProfile');
+    Route::get('app/contract/', [ContractController::class, 'index']);
+    Route::get('app/contract/{id}', [ContractController::class, 'getByUserId']);
 });
