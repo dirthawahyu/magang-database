@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\App\ContractController;
 use App\Http\Controllers\Api\App\EditController;
+use App\Http\Controllers\Api\App\LeaveController;
 use App\Http\Controllers\Api\App\LoginController;
 use App\Http\Controllers\Api\App\PasswordController;
 use App\Http\Controllers\Api\App\PayrollController;
@@ -38,4 +39,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/contract/', [ContractController::class, 'index']);
     Route::get('app/contract/{id}', [ContractController::class, 'getByUserId']);
     Route::get('app/payroll/{id}', [PayrollController::class, 'getByUserId']);
+    Route::get('app/leave', [LeaveController::class, 'index']);
+    Route::get('app/leave/{id}', [LeaveController::class, 'show']);
+    Route::post('app/leave', [LeaveController::class, 'store'])->name('store');
+    Route::get('app/leave/user/{id}', [LeaveController::class, 'getByUserId']);
+    Route::get('app/leave/approval', [LeaveController::class, 'approval']);
+    
 });

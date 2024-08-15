@@ -81,4 +81,8 @@ class User extends Authenticatable
         return $this->hasOne(Employee::class, 'id_user');
     }
 
+    public function leaves()
+    {
+        return $this->hasMany(Leave::class, 'id_master_category');
+    }
 }
