@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\App\ContractController;
 use App\Http\Controllers\Api\App\EditController;
 use App\Http\Controllers\Api\App\LoginController;
 use App\Http\Controllers\Api\App\PasswordController;
+use App\Http\Controllers\Api\App\PayrollController;
 use App\Http\Controllers\Api\App\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -36,4 +37,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('app/edit', [EditController::class, 'editProfile'])->name('editProfile');
     Route::get('app/contract/', [ContractController::class, 'index']);
     Route::get('app/contract/{id}', [ContractController::class, 'getByUserId']);
+    Route::get('app/payroll/{id}', [PayrollController::class, 'getByUserId']);
 });
