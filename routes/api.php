@@ -31,12 +31,14 @@ Route::post('register', \App\Http\Controllers\Api\Auth\RegisterController::class
 Route::post('app/login', [LoginController::class, 'loginApp']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/user', [LoginController::class, 'fetch'])->name('fetch');
-    Route::post('app/logout', [LoginController::class, 'logout'])->name('logout');
+    
+    //Profile
     Route::get('app/profile', [ProfileController::class, 'index']);
     Route::get('app/profile/{id}', [ProfileController::class, 'show']);
-    Route::post('app/password', [PasswordController::class, 'changePassword'])->name('changePassword');
+    Route::post('app/profile/photo', [ProfileController::class, 'updateProfilePhoto'])->name('updateProfilePhoto');
     Route::post('app/edit', [EditController::class, 'editProfile'])->name('editProfile');
-
+    Route::post('app/password', [PasswordController::class, 'changePassword'])->name('changePassword');
+    Route::post('app/logout', [LoginController::class, 'logout'])->name('logout');
     //Contract
     Route::get('app/contract/', [ContractController::class, 'index']);
     Route::get('app/contract/{id}', [ContractController::class, 'getByUserId']);
