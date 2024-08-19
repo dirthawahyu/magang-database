@@ -42,7 +42,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/contract/{id}', [ContractController::class, 'getByUserId']);
 
     //Payroll
-    Route::get('app/payroll/{id}', [PayrollController::class, 'getByUserId']);
+    Route::get('app/payrolls/user/{userId}', [PayrollController::class, 'getByUserId']);
+    Route::get('app/payroll/{payrollId}', [PayrollController::class, 'getDetailByPayrollId']);
+
 
     //Leave
     Route::get('app/leave', [LeaveController::class, 'index']);
