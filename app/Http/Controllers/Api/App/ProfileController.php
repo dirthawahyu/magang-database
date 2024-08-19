@@ -7,6 +7,10 @@ use App\Http\Controllers\Controller;
 use App\Models\EmployeeGroup;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class ProfileController extends Controller
 {
@@ -61,5 +65,40 @@ class ProfileController extends Controller
         ];
 
         return response()->json($profile);
+    }
+
+    public function updateProfilePhoto(Request $request)
+    {
+        $request->validate([
+            'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Validasi file yang diupload
+        ]);
+
+        /** @var \App\Models\User $user **/
+        $user = Auth::user();
+
+        if ($request->hasFile('profile_photo')) {
+            // Menghapus foto lama jika ada
+            if ($user->profile_photo) {
+                // Menghapus foto lama dari direktori penyimpanan
+                Storage::delete('public/profile_photos/' . $user->profile_photo);
+            }
+
+            // Simpan foto baru dengan nama acak
+            $file = $request->file('profile_photo');
+            $filename = Str::random(40) . '.' . $file->getClientOriginalExtension(); // Nama acak dengan ekstensi asli
+            $path = $file->storeAs('public/profile_photos', $filename); // Simpan file dengan nama acak
+
+            // Update user dengan nama file baru
+            $user->profile_photo = $filename;
+
+            $user->save();
+
+            return response()->json([
+                'message' => 'Profile photo updated successfully.',
+                'profile_photo_url' => Storage::url('profile_photos/' . $filename),
+            ], 200);
+        }
+
+        return response()->json(['message' => 'Profile photo not uploaded.'], 400);
     }
 }
