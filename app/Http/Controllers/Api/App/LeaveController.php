@@ -31,7 +31,7 @@ class LeaveController extends Controller
         ]);
     }
 
-    public function show($id)
+    public function getWithLeaveId($id)
     {
         // Mencari data cuti berdasarkan ID
         $leave = Leave::with(['user', 'masterCategory', 'employee'])->find($id);
@@ -104,14 +104,11 @@ class LeaveController extends Controller
         ]);
     }
 
-    public function approval()
+    public function pending()
     {
         $leaves = Leave::with(['user', 'masterCategory', 'employee'])
             ->where('status', 'Pending')
             ->get();
-
-        // Menambahkan log untuk debugging
-        \Log::info('Pending Leaves:', $leaves->toArray());
 
         if ($leaves->isEmpty()) {
             return response()->json([
@@ -137,5 +134,94 @@ class LeaveController extends Controller
         ]);
     }
 
+    public function approved()
+    {
+        $leaves = Leave::with(['user', 'masterCategory', 'employee'])
+            ->where('status', 'approved')
+            ->get();
+
+        if ($leaves->isEmpty()) {
+            return response()->json([
+                'message' => 'No approved leaves found.'
+            ], 404);
+        }
+
+        return response()->json([
+            'leaves' => $leaves->map(function ($leave) {
+                return [
+                    'id' => $leave->id,
+                    'id_user' => $leave->id_user,
+                    'first_name' => $leave->user ? $leave->user->first_name : null,
+                    'last_name' => $leave->user ? $leave->user->last_name : null,
+                    'nip' => $leave->employee ? $leave->employee->nip : null,
+                    'master_category' => $leave->masterCategory ? $leave->masterCategory->name : null,
+                    'reason_for_leave' => $leave->reason_for_leave,
+                    'start_date' => $leave->start_date,
+                    'end_date' => $leave->end_date,
+                    'status' => $leave->status,
+                ];
+            })
+        ]);
+    }
+
+    public function declined()
+    {
+        $leaves = Leave::with(['user', 'masterCategory', 'employee'])
+            ->where('status', 'declined')
+            ->get();
+
+        if ($leaves->isEmpty()) {
+            return response()->json([
+                'message' => 'No declined leaves found.'
+            ], 404);
+        }
+
+        return response()->json([
+            'leaves' => $leaves->map(function ($leave) {
+                return [
+                    'id' => $leave->id,
+                    'id_user' => $leave->id_user,
+                    'first_name' => $leave->user ? $leave->user->first_name : null,
+                    'last_name' => $leave->user ? $leave->user->last_name : null,
+                    'nip' => $leave->employee ? $leave->employee->nip : null,
+                    'master_category' => $leave->masterCategory ? $leave->masterCategory->name : null,
+                    'reason_for_leave' => $leave->reason_for_leave,
+                    'start_date' => $leave->start_date,
+                    'end_date' => $leave->end_date,
+                    'status' => $leave->status,
+                ];
+            })
+        ]);
+    }
+
+    public function canceled()
+    {
+        $leaves = Leave::with(['user', 'masterCategory', 'employee'])
+            ->where('status', 'canceled')
+            ->get();
+
+        if ($leaves->isEmpty()) {
+            return response()->json([
+                'message' => 'No canceled leaves found.'
+            ], 404);
+        }
+
+        return response()->json([
+            'leaves' => $leaves->map(function ($leave) {
+                return [
+                    'id' => $leave->id,
+                    'id_user' => $leave->id_user,
+                    'first_name' => $leave->user ? $leave->user->first_name : null,
+                    'last_name' => $leave->user ? $leave->user->last_name : null,
+                    'nip' => $leave->employee ? $leave->employee->nip : null,
+                    'master_category' => $leave->masterCategory ? $leave->masterCategory->name : null,
+                    'reason_for_leave' => $leave->reason_for_leave,
+                    'start_date' => $leave->start_date,
+                    'end_date' => $leave->end_date,
+                    'status' => $leave->status,
+                ];
+            })
+        ]);
+    }
 
 }

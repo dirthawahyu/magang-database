@@ -30,19 +30,27 @@ Route::post('register', \App\Http\Controllers\Api\Auth\RegisterController::class
 //API APP
 Route::post('app/login', [LoginController::class, 'loginApp']);
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('app/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('app/user', [LoginController::class, 'fetch'])->name('fetch');
+    Route::post('app/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('app/profile', [ProfileController::class, 'index']);
     Route::get('app/profile/{id}', [ProfileController::class, 'show']);
     Route::post('app/password', [PasswordController::class, 'changePassword'])->name('changePassword');
     Route::post('app/edit', [EditController::class, 'editProfile'])->name('editProfile');
+
+    //Contract
     Route::get('app/contract/', [ContractController::class, 'index']);
     Route::get('app/contract/{id}', [ContractController::class, 'getByUserId']);
+
+    //Payroll
     Route::get('app/payroll/{id}', [PayrollController::class, 'getByUserId']);
+
+    //Leave
     Route::get('app/leave', [LeaveController::class, 'index']);
-    Route::get('app/leave/{id}', [LeaveController::class, 'show']);
+    Route::get('app/leave/detail/{id}', [LeaveController::class, 'getWithLeaveId']);
     Route::post('app/leave', [LeaveController::class, 'store'])->name('store');
     Route::get('app/leave/user/{id}', [LeaveController::class, 'getByUserId']);
-    Route::get('app/leave/approval', [LeaveController::class, 'approval']);
-    
+    Route::get('app/leave/pending/', [LeaveController::class, 'pending'])->name('pending');
+    Route::get('app/leave/approved/', [LeaveController::class, 'approved'])->name('approved');
+    Route::get('app/leave/declined/', [LeaveController::class, 'declined'])->name('declined');
+    Route::get('app/leave/canceled/', [LeaveController::class, 'canceled'])->name('canceled');
 });
