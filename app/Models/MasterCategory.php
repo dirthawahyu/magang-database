@@ -13,17 +13,16 @@ class MasterCategory extends Model
 
     protected $fillable = [
         'type',
-        'name'
+        'name',
     ];
 
-    // public function leaves()
-    // {
-    //     return $this->hasMany(Leave::class, 'id_master_category');
-    // }
-
-    public function payroll()
+    public function payrolls()
     {
         return $this->hasMany(Payroll::class, 'id_master_category');
     }
 
+    public function payrollDetails()
+    {
+        return $this->hasMany(PayrollDetail::class, 'id_master_category');
+    }
 }

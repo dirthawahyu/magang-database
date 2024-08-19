@@ -5,17 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Payroll extends Model
+class PayrollDetail extends Model
 {
     use HasFactory;
 
-    protected $table = 'payroll_header';
+    protected $table = 'payroll_line';
 
     protected $fillable = [
-        'id_employee',
+        'id_payroll_header',
         'id_master_category',
-        'payroll_date',
-        'net_amount',
+        'nominal',
+        'note',
     ];
 
     public function masterCategory()
@@ -23,8 +23,8 @@ class Payroll extends Model
         return $this->belongsTo(MasterCategory::class, 'id_master_category');
     }
 
-    public function payrollDetails()
+    public function payroll()
     {
-        return $this->hasMany(PayrollDetail::class, 'id_payroll_header');
+        return $this->belongsTo(Payroll::class, 'id_payroll_header');
     }
 }
