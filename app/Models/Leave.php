@@ -27,9 +27,9 @@ class Leave extends Model
     }
 
     // Relasi ke model MasterCategory
-    public function masterCategory()
+    public function leaveCategory()
     {
-        return $this->belongsTo(MasterCategory::class, 'id_master_category');
+        return $this->belongsTo(MasterCategory::class, 'id_leave_category');
     }
     public function employee()
     {

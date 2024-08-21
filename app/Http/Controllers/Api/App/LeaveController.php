@@ -11,7 +11,7 @@ class LeaveController extends Controller
     public function index()
     {
         // Mengambil semua data leave beserta relasi ke user dan master category
-        $leaves = Leave::with(['user', 'masterCategory', 'employee'])->get();
+        $leaves = Leave::with(['user', 'leaveCategory', 'employee'])->get();
 
         return response()->json([
             'leaves' => $leaves->map(function ($leave) {
@@ -21,7 +21,7 @@ class LeaveController extends Controller
                     'first_name' => $leave->user ? $leave->user->first_name : null,
                     'last_name' => $leave->user ? $leave->user->last_name : null,
                     'nip' => $leave->employee ? $leave->employee->nip : null,
-                    'master_category' => $leave->masterCategory ? $leave->masterCategory->name : null,
+                    'leave_category' => $leave->leaveCategory ? $leave->leaveCategory->name : null,
                     'reason_for_leave' => $leave->reason_for_leave,
                     'start_date' => $leave->start_date,
                     'end_date' => $leave->end_date,
@@ -34,7 +34,7 @@ class LeaveController extends Controller
     public function getWithLeaveId($id)
     {
         // Mencari data cuti berdasarkan ID
-        $leave = Leave::with(['user', 'masterCategory', 'employee'])->find($id);
+        $leave = Leave::with(['user', 'leaveCategory', 'employee'])->find($id);
 
         if (!$leave) {
             return response()->json([
@@ -48,7 +48,7 @@ class LeaveController extends Controller
                 'last_name' => $leave->user ? $leave->user->last_name : null,
                 'nip' => $leave->employee ? $leave->employee->nip : null,
                 'id_user' => $leave->id_user,
-                'master_category' => $leave->masterCategory ? $leave->masterCategory->name : null,
+                'leave_category' => $leave->leaveCategory ? $leave->leaveCategory->name : null,
                 'reason_for_leave' => $leave->reason_for_leave,
                 'start_date' => $leave->start_date,
                 'end_date' => $leave->end_date,
@@ -62,7 +62,7 @@ class LeaveController extends Controller
     {
         // Validasi data input
         $request->validate([
-            'id_master_category' => 'required|integer',
+            'id_leave_category' => 'required|integer',
             'reason_for_leave' => 'nullable|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
@@ -74,7 +74,7 @@ class LeaveController extends Controller
         // Menyimpan data cuti baru
         $leave = new Leave();
         $leave->id_user = $userId;
-        $leave->id_master_category = $request->id_master_category;
+        $leave->id_leave_category = $request->id_leave_category;
         $leave->reason_for_leave = $request->reason_for_leave;
         $leave->start_date = $request->start_date;
         $leave->end_date = $request->end_date;
@@ -106,7 +106,7 @@ class LeaveController extends Controller
 
     public function pending()
     {
-        $leaves = Leave::with(['user', 'masterCategory', 'employee'])
+        $leaves = Leave::with(['user', 'leaveCategory', 'employee'])
             ->where('status', 'Pending')
             ->get();
 
@@ -124,7 +124,7 @@ class LeaveController extends Controller
                     'first_name' => $leave->user ? $leave->user->first_name : null,
                     'last_name' => $leave->user ? $leave->user->last_name : null,
                     'nip' => $leave->employee ? $leave->employee->nip : null,
-                    'master_category' => $leave->masterCategory ? $leave->masterCategory->name : null,
+                    'leave_category' => $leave->leaveCategory ? $leave->leaveCategory->name : null,
                     'reason_for_leave' => $leave->reason_for_leave,
                     'start_date' => $leave->start_date,
                     'end_date' => $leave->end_date,
@@ -136,7 +136,7 @@ class LeaveController extends Controller
 
     public function approved()
     {
-        $leaves = Leave::with(['user', 'masterCategory', 'employee'])
+        $leaves = Leave::with(['user', 'leaveCategory', 'employee'])
             ->where('status', 'approved')
             ->get();
 
@@ -154,7 +154,7 @@ class LeaveController extends Controller
                     'first_name' => $leave->user ? $leave->user->first_name : null,
                     'last_name' => $leave->user ? $leave->user->last_name : null,
                     'nip' => $leave->employee ? $leave->employee->nip : null,
-                    'master_category' => $leave->masterCategory ? $leave->masterCategory->name : null,
+                    'leave_category' => $leave->leaveCategory ? $leave->leaveCategory->name : null,
                     'reason_for_leave' => $leave->reason_for_leave,
                     'start_date' => $leave->start_date,
                     'end_date' => $leave->end_date,
@@ -166,7 +166,7 @@ class LeaveController extends Controller
 
     public function declined()
     {
-        $leaves = Leave::with(['user', 'masterCategory', 'employee'])
+        $leaves = Leave::with(['user', 'leaveCategory', 'employee'])
             ->where('status', 'declined')
             ->get();
 
@@ -184,7 +184,7 @@ class LeaveController extends Controller
                     'first_name' => $leave->user ? $leave->user->first_name : null,
                     'last_name' => $leave->user ? $leave->user->last_name : null,
                     'nip' => $leave->employee ? $leave->employee->nip : null,
-                    'master_category' => $leave->masterCategory ? $leave->masterCategory->name : null,
+                    'leave_category' => $leave->leaveCategory ? $leave->leaveCategory->name : null,
                     'reason_for_leave' => $leave->reason_for_leave,
                     'start_date' => $leave->start_date,
                     'end_date' => $leave->end_date,
@@ -196,7 +196,7 @@ class LeaveController extends Controller
 
     public function canceled()
     {
-        $leaves = Leave::with(['user', 'masterCategory', 'employee'])
+        $leaves = Leave::with(['user', 'leaveCategory', 'employee'])
             ->where('status', 'canceled')
             ->get();
 
@@ -214,7 +214,7 @@ class LeaveController extends Controller
                     'first_name' => $leave->user ? $leave->user->first_name : null,
                     'last_name' => $leave->user ? $leave->user->last_name : null,
                     'nip' => $leave->employee ? $leave->employee->nip : null,
-                    'master_category' => $leave->masterCategory ? $leave->masterCategory->name : null,
+                    'leave_category' => $leave->leaveCategory ? $leave->leaveCategory->name : null,
                     'reason_for_leave' => $leave->reason_for_leave,
                     'start_date' => $leave->start_date,
                     'end_date' => $leave->end_date,
