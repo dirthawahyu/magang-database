@@ -44,10 +44,10 @@ class LeaveController extends Controller
 
         return response()->json([
             'leave' => [
+                'id_user' => $leave->id_user,
                 'first_name' => $leave->user ? $leave->user->first_name : null,
                 'last_name' => $leave->user ? $leave->user->last_name : null,
                 'nip' => $leave->employee ? $leave->employee->nip : null,
-                'id_user' => $leave->id_user,
                 'leave_category' => $leave->leaveCategory ? $leave->leaveCategory->name : null,
                 'reason_for_leave' => $leave->reason_for_leave,
                 'start_date' => $leave->start_date,
@@ -90,7 +90,9 @@ class LeaveController extends Controller
     public function getByUserId($userId)
     {
         // Fetch all leaves for the given user ID
-        $leaves = Leave::where('id_user', $userId)->get();
+        $leaves = Leave::with(['user', 'leaveCategory', 'employee'])
+            ->where('id_user', $userId)
+            ->get();
 
         if ($leaves->isEmpty()) {
             return response()->json([
@@ -100,9 +102,24 @@ class LeaveController extends Controller
 
         // Return a JSON response with the leaves data wrapped in an 'leaves' key
         return response()->json([
-            'leaves' => $leaves
+            'leaves' => $leaves->map(function ($leave) {
+                return [
+                    'id' => $leave->id,
+                    'id_user' => $leave->id_user,
+                    'first_name' => $leave->user ? $leave->user->first_name : null,
+                    'last_name' => $leave->user ? $leave->user->last_name : null,
+                    'nip' => $leave->employee ? $leave->employee->nip : null,
+                    'leave_category' => $leave->leaveCategory ? $leave->leaveCategory->name : null,
+                    'reason_for_leave' => $leave->reason_for_leave,
+                    'start_date' => $leave->start_date,
+                    'end_date' => $leave->end_date,
+                    'status' => $leave->status,
+                ];
+            })
         ]);
     }
+
+
 
     public function pending()
     {
