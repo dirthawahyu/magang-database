@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\Leave;
+use App\Models\LeaveCategory;
 use Illuminate\Http\Request;
 
 class LeaveController extends Controller
@@ -66,7 +67,7 @@ class LeaveController extends Controller
             'reason_for_leave' => 'nullable|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'status' => 'nullable|string', // Mengizinkan status bernilai null
+            'status' => 'nullable|string', 
         ]);
 
         $userId = auth()->user()->id;
@@ -239,6 +240,13 @@ class LeaveController extends Controller
                 ];
             })
         ]);
+    }
+
+    public function LeaveCategory()
+    {
+        $leavesCategory = LeaveCategory::all();
+
+        return response()->json($leavesCategory);
     }
 
 }
