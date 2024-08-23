@@ -67,7 +67,7 @@ class LeaveController extends Controller
             'reason_for_leave' => 'nullable|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'status' => 'nullable|string', 
+            'status' => 'nullable|string',
         ]);
 
         $userId = auth()->user()->id;
@@ -271,5 +271,23 @@ class LeaveController extends Controller
             'leave' => $leave
         ]);
     }
+
+    public function destroy($id)
+    {
+        $leave = Leave::find($id);
+
+        if (!$leave) {
+            return response()->json([
+                'message' => 'Leave not found.'
+            ], 404);
+        }
+
+        $leave->delete();
+
+        return response()->json([
+            'message' => 'Leave deleted successfully.'
+        ], 200);
+    }
+
 
 }

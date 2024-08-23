@@ -55,4 +55,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/leave/user/{id}', [LeaveController::class, 'getByUserId']);
     Route::get('app/leave/category', [LeaveController::class, 'leaveCategory']);
     Route::put('app/leave/update/{id}', [LeaveController::class, 'updateStatus']);
+    Route::delete('app/leave/{id}', [LeaveController::class, 'destroy']);
 });
