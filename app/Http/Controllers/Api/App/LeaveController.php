@@ -249,4 +249,27 @@ class LeaveController extends Controller
         return response()->json($leavesCategory);
     }
 
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|string|in:Approved,Declined,Canceled',
+        ]);
+
+        $leave = Leave::find($id);
+
+        if (!$leave) {
+            return response()->json([
+                'message' => 'Leave not found.'
+            ], 404);
+        }
+
+        $leave->status = $request->status;
+        $leave->save();
+
+        return response()->json([
+            'message' => 'Leave status updated successfully.',
+            'leave' => $leave
+        ]);
+    }
+
 }

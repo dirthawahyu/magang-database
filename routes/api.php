@@ -54,4 +54,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('app/leave/make/', [LeaveController::class, 'store'])->name('store');
     Route::get('app/leave/user/{id}', [LeaveController::class, 'getByUserId']);
     Route::get('app/leave/category', [LeaveController::class, 'leaveCategory']);
+    Route::put('app/leave/update/{id}', [LeaveController::class, 'updateStatus']);
 });
