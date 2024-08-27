@@ -18,6 +18,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
+
         // DB::table('role_name')->insert([
         //     ['name' => ''],
         //     ['name' => ''],

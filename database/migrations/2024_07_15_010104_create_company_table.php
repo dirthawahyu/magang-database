@@ -12,19 +12,14 @@ class CreateCompanyTable extends Migration
     {
         Schema::create('company', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_city');
-            $table->string('pic');
-            $table->string('company');
-            $table->string('address');
-            $table->timestamps();
-            
-            $table->foreign('id_city')->references('id')->on('city')->onDelete('cascade');
+            $table->string('name');
+            $table->timestamps();            
         });
 
         DB::table('company')->insert([
-            ['id_city' => 1, 'pic' => 'Wildan', 'company' => 'PT. JAWA','address' => 'Jl Siwalankerto Permai No. 1'],
-            ['id_city' => 2, 'pic' => 'Adit', 'company' => 'PT. JAWIR','address' => 'Jl Siwalankerto Permai No. 2'],
-            ['id_city' => 3, 'pic' => 'Asep', 'company' => 'PT. JAWOR','address' => 'Jl Siwalankerto Permai No. 3'],
+            ['name' => 'PT Surya'],
+            ['name' => 'PT Jaya'],
+            ['name' => 'PT Anugrah'],
         ]);
     }
 

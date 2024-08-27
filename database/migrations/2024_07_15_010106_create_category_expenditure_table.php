@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class CreateCategoryExpenditureTable extends Migration
 {
@@ -14,12 +14,11 @@ class CreateCategoryExpenditureTable extends Migration
             $table->string('name');
             $table->timestamps();
         });
-        DB::table('role_name')->insert([
-              ['name' => 'Salaries and Wages'],
-              ['name' => 'Rent and Utilities'],
-              ['name' => 'Raw Materials'],
-              ['name' => 'Production Costs'],
-              ['name' => 'Advertising and Promotion'],
+        DB::table('category_expenditure')->insert([
+              ['name' => 'Transportasi'],
+              ['name' => 'Konsumsi'],
+              ['name' => 'Hotel'],
+              ['name' => 'DLL'],
           ]);
     }
 
