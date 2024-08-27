@@ -33,8 +33,6 @@ class CreateBusinessTripTable extends Migration
                 'start_date' => '2024-08-15',
                 'end_date' => '2024-09-20',
                 'extend_day' => 2,
-                'pic_company' => 'Wildan',
-                'pic_role' => 'Project Manager',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
