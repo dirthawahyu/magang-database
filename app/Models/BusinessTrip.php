@@ -35,5 +35,5 @@ class BusinessTrip extends Model
     {
         return $this->belongsToMany(User::class, 'trip_detail', 'id_business_trip', 'id_user');
     }
-}
 
+}

@@ -91,6 +91,7 @@ class User extends Authenticatable
         return $this->belongsToMany(BusinessTrip::class, 'trip_detail', 'id_user', 'id_business_trip');
     }
 
+
     public function getFullNameAttribute()
     {
         return "{$this->first_name} {$this->last_name}";
