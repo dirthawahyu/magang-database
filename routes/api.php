@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\App\LoginController;
 use App\Http\Controllers\Api\App\PasswordController;
 use App\Http\Controllers\Api\App\PayrollController;
 use App\Http\Controllers\Api\App\ProfileController;
+use App\Http\Controllers\Api\App\BusinessTripController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -56,4 +57,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/leave/category', [LeaveController::class, 'leaveCategory']);
     Route::put('app/leave/update/{id}', [LeaveController::class, 'updateStatus']);
     Route::delete('app/leave/{id}', [LeaveController::class, 'destroy']);
+    
+    //Business Trip
+    Route::get('app/business/', [BusinessTripController::class, 'getAllTripDetails']);
+
 });
