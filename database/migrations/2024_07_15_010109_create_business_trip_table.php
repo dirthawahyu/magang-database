@@ -18,8 +18,6 @@ class CreateBusinessTripTable extends Migration
             $table->date('start_date');
             $table->date('end_date');
             $table->integer('extend_day');
-            $table->string('pic_company');
-            $table->string('pic_role');
             $table->timestamps();
             $table->foreign('id_company')->references('id')->on('company')->onDelete('cascade');
         });
