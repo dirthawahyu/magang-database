@@ -20,6 +20,7 @@ class BusinessTrip extends Model
         'phone_number',
         'start_date',
         'end_date',
+        'departure_from',
         'extend_day',
     ];
 

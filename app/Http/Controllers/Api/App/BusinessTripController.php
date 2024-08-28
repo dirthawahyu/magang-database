@@ -22,6 +22,7 @@ class BusinessTripController extends Controller
                     'end_date' => $trip->end_date,
                     'status' => $trip->status,
                     'company_address' => optional($trip->companyCity)->address ?? 'N/A',
+                    'departure_from' => $trip->departure_from,
                     'pic' => optional($trip->companyCity)->pic ?? 'N/A',
                     'pic_role' => optional($trip->companyCity)->pic_role ?? 'N/A',
                     'pic_phone' => optional($trip->companyCity)->pic_phone ?? 'N/A',

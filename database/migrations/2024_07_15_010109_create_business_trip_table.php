@@ -17,6 +17,7 @@ class CreateBusinessTripTable extends Migration
             $table->integer('phone_number');
             $table->date('start_date');
             $table->date('end_date');
+            $table->string('departure_from');
             $table->integer('extend_day');
             $table->timestamps();
             $table->foreign('id_company_city')->references('id')->on('company_city')->onDelete('cascade');
@@ -32,6 +33,7 @@ class CreateBusinessTripTable extends Migration
                 'phone_number' => 1234567890,
                 'start_date' => '2024-08-15',
                 'end_date' => '2024-09-20',
+                'departure_from' => 'Aceh',
                 'extend_day' => 2,
                 'created_at' => now(),
                 'updated_at' => now(),
