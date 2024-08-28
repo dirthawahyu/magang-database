@@ -10,7 +10,7 @@ class CreateBusinessTripTable extends Migration
     {
         Schema::create('business_trip', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_company');
+            $table->unsignedBigInteger('id_company_city');
             $table->string('note');
             $table->text('photo_document')->nullable();
             $table->enum('status', ['Draft', 'On Progress', 'Completed', 'Canceled'])->default('Draft');
@@ -19,13 +19,13 @@ class CreateBusinessTripTable extends Migration
             $table->date('end_date');
             $table->integer('extend_day');
             $table->timestamps();
-            $table->foreign('id_company')->references('id')->on('company')->onDelete('cascade');
+            $table->foreign('id_company_city')->references('id')->on('company_city')->onDelete('cascade');
         });
 
         // Insert sample data into the 'business_trip' table
         DB::table('business_trip')->insert([
             [
-                'id_company' => 1,
+                'id_company_city' => 1,
                 'note' => 'Business trip to New York for client meeting',
                 'photo_document' => 'https://i.pinimg.com/736x/3c/a3/f0/3ca3f02e1ec3a6d2d30a6558b97add06.jpg',
                 'status' => 'Draft',

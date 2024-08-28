@@ -13,7 +13,7 @@ class BusinessTrip extends Model
 
     // Kolom yang dapat diisi secara massal
     protected $fillable = [
-        'id_company',
+        'id_company_city',
         'note',
         'photo_document',
         'status',
@@ -21,19 +21,17 @@ class BusinessTrip extends Model
         'start_date',
         'end_date',
         'extend_day',
-        'pic_company',
-        'pic_role',
     ];
 
-    // Relasi dengan model lain
-    public function company()
+    // Relasi dengan model CompanyCity
+    public function companyCity()
     {
-        return $this->belongsTo(Company::class, 'id_company');
+        return $this->belongsTo(CompanyCity::class, 'id_company_city');
     }
 
+    // Relasi many-to-many dengan model User
     public function users()
     {
         return $this->belongsToMany(User::class, 'trip_detail', 'id_business_trip', 'id_user');
     }
-
 }
