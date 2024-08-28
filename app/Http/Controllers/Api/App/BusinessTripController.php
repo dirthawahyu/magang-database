@@ -15,6 +15,7 @@ class BusinessTripController extends Controller
 
             $formattedTripDetails = $tripDetails->map(function ($trip) {
                 return [
+                    'id_business_trip' => $trip->id,
                     'company_name' => $trip->companyCity->company->name ?? 'N/A',
                     'city_name' => optional($trip->companyCity->city)->name ?? 'N/A',
                     'start_date' => $trip->start_date,
