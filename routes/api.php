@@ -62,8 +62,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/business/', [BusinessTripController::class, 'getAllTripDetails']);
     Route::get('app/business/company', [BusinessTripController::class, 'company']);
     Route::get('app/business/city', [BusinessTripController::class, 'city']);
-    Route::put('app/business/{id}/extend', [BusinessTripController::class, 'updateExtendDay']);
+    Route::put('app/business/extend/{id}', [BusinessTripController::class, 'updateExtendDay']);
     Route::get('app/business/users/fullname', [BusinessTripController::class, 'getUsersFullName']);
-
+    Route::post('app/business/make/', [BusinessTripController::class, 'store']);
+    Route::get('app/business/companycity', [BusinessTripController::class, 'getCompanyCity']);
 
 });

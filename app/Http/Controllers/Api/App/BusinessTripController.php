@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BusinessTrip;
 use App\Models\City;
 use App\Models\Company;
+use App\Models\CompanyCity;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -50,40 +51,33 @@ class BusinessTripController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validatedData = $request->validate([
-            'id_company' => 'required|exists:companies,id',
-            'id_city' => 'required|exists:cities,id',
+            'id_company_city' => 'required|exists:company_city,id',
+            'note' => 'required|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date',
             'departure_from' => 'required|string',
-            'pic' => 'required|string',
-            'pic_role' => 'required|string',
-            'pic_phone' => 'required|string',
             'extend_day' => 'nullable|integer',
-            'id_user' => 'required|array',
-            'id_user.*' => 'exists:users,id',
         ]);
 
         try {
-            $company = Company::findOrFail($validatedData['id_company']);
-            $city = City::findOrFail($validatedData['id_city']);
 
+
+            // Buat BusinessTrip baru
             $businessTrip = BusinessTrip::create([
-                'id_company_city' => $validatedData['id_company_city'],
-                // Assuming this is a reference to a pivot table
+                'id_company_city' => $validatedData['id_company_city'] ?? '',
+                'note' => $validatedData['note'] ?? '',
+                'photo_document' => $validatedData['photo_document'] ?? null,
                 'start_date' => $validatedData['start_date'],
                 'end_date' => $validatedData['end_date'],
                 'departure_from' => $validatedData['departure_from'],
-                'pic' => $validatedData['pic'],
-                'pic_role' => $validatedData['pic_role'],
-                'pic_phone' => $validatedData['pic_phone'],
                 'extend_day' => $validatedData['extend_day'] ?? 0,
             ]);
 
-            $businessTrip->users()->sync($validatedData['id_user']);
-
-            return response()->json(['message' => 'Business trip created successfully', 'data' => $businessTrip], 201);
+            return response()->json([
+                'message' => 'Business trip created successfully',
+                'data' => $businessTrip
+            ], 201);
         } catch (\Exception $e) {
-            // Tangani error
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -124,18 +118,45 @@ class BusinessTripController extends Controller
     }
 
     public function getUsersFullName(): JsonResponse
+    {
+        try {
+            $users = User::all(); // Ambil semua data user
+
+            $formattedUsers = $users->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'full_name' => $user->full_name,
+                ];
+            });
+
+            return response()->json($formattedUsers, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getCompanyCity(): JsonResponse
 {
     try {
-        $users = User::all(); // Ambil semua data user
+        // Mengambil data dari tabel company_city beserta informasi terkait company dan city
+        $companyCities = CompanyCity::with(['company', 'city'])->get();
 
-        $formattedUsers = $users->map(function ($user) {
+        // Memformat data untuk output JSON
+        $formattedCompanyCities = $companyCities->map(function ($companyCity) {
             return [
-                'id' => $user->id,
-                'full_name' => $user->full_name, 
+                'id' => $companyCity->id,
+                'id_company' => $companyCity->company->id ?? 'N/A',
+                'company_name' => $companyCity->company->name ?? 'N/A',
+                'id_city' => $companyCity->city->id ?? 'N/A',
+                'city_name' => $companyCity->city->name ?? 'N/A',
+                'address' => $companyCity->address,
+                'pic' => $companyCity->pic,
+                'pic_role' => $companyCity->pic_role,
+                'pic_phone' => $companyCity->pic_phone,
             ];
         });
 
-        return response()->json($formattedUsers, 200);
+        return response()->json($formattedCompanyCities, 200);
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()], 500);
     }
