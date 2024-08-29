@@ -10,6 +10,7 @@ use App\Models\CompanyCity;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BusinessTripController extends Controller
 {
@@ -82,6 +83,32 @@ class BusinessTripController extends Controller
         }
     }
 
+    public function storeTripDetail(Request $request): JsonResponse
+    {
+        $validatedData = $request->validate([
+            'id_business_trip' => 'required|exists:business_trip,id',
+            'id_user' => 'required|array',
+            'id_user.*' => 'exists:users,id',
+        ]);
+
+        try {
+            // Simpan detail perjalanan ke dalam tabel trip_detail
+            foreach ($validatedData['id_user'] as $userId) {
+                DB::table('trip_detail')->updateOrInsert(
+                    ['id_user' => $userId, 'id_business_trip' => $validatedData['id_business_trip']],
+                    ['created_at' => now(), 'updated_at' => now()]
+                );
+            }
+
+            return response()->json([
+                'message' => 'Trip details added successfully'
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+
     public function company()
     {
         $company = Company::all();
@@ -136,31 +163,31 @@ class BusinessTripController extends Controller
     }
 
     public function getCompanyCity(): JsonResponse
-{
-    try {
-        // Mengambil data dari tabel company_city beserta informasi terkait company dan city
-        $companyCities = CompanyCity::with(['company', 'city'])->get();
+    {
+        try {
+            // Mengambil data dari tabel company_city beserta informasi terkait company dan city
+            $companyCities = CompanyCity::with(['company', 'city'])->get();
 
-        // Memformat data untuk output JSON
-        $formattedCompanyCities = $companyCities->map(function ($companyCity) {
-            return [
-                'id' => $companyCity->id,
-                'id_company' => $companyCity->company->id ?? 'N/A',
-                'company_name' => $companyCity->company->name ?? 'N/A',
-                'id_city' => $companyCity->city->id ?? 'N/A',
-                'city_name' => $companyCity->city->name ?? 'N/A',
-                'address' => $companyCity->address,
-                'pic' => $companyCity->pic,
-                'pic_role' => $companyCity->pic_role,
-                'pic_phone' => $companyCity->pic_phone,
-            ];
-        });
+            // Memformat data untuk output JSON
+            $formattedCompanyCities = $companyCities->map(function ($companyCity) {
+                return [
+                    'id' => $companyCity->id,
+                    'id_company' => $companyCity->company->id ?? 'N/A',
+                    'company_name' => $companyCity->company->name ?? 'N/A',
+                    'id_city' => $companyCity->city->id ?? 'N/A',
+                    'city_name' => $companyCity->city->name ?? 'N/A',
+                    'address' => $companyCity->address,
+                    'pic' => $companyCity->pic,
+                    'pic_role' => $companyCity->pic_role,
+                    'pic_phone' => $companyCity->pic_phone,
+                ];
+            });
 
-        return response()->json($formattedCompanyCities, 200);
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json($formattedCompanyCities, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
-}
 
 
 

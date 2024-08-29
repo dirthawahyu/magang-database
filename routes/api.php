@@ -66,5 +66,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/business/users/fullname', [BusinessTripController::class, 'getUsersFullName']);
     Route::post('app/business/make/', [BusinessTripController::class, 'store']);
     Route::get('app/business/companycity', [BusinessTripController::class, 'getCompanyCity']);
+    Route::post('app/business/trip', [BusinessTripController::class, 'storeTripDetail']);
+
 
 });
