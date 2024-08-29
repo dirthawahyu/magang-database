@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\App\BusinessTripController;
 use App\Http\Controllers\Api\App\ContractController;
 use App\Http\Controllers\Api\App\EditController;
 use App\Http\Controllers\Api\App\LeaveController;
@@ -7,7 +8,6 @@ use App\Http\Controllers\Api\App\LoginController;
 use App\Http\Controllers\Api\App\PasswordController;
 use App\Http\Controllers\Api\App\PayrollController;
 use App\Http\Controllers\Api\App\ProfileController;
-use App\Http\Controllers\Api\App\BusinessTripController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -60,5 +60,10 @@ Route::middleware('auth:sanctum')->group(function () {
     
     //Business Trip
     Route::get('app/business/', [BusinessTripController::class, 'getAllTripDetails']);
+    Route::get('app/business/company', [BusinessTripController::class, 'company']);
+    Route::get('app/business/city', [BusinessTripController::class, 'city']);
+    Route::put('app/business/{id}/extend', [BusinessTripController::class, 'updateExtendDay']);
+    Route::get('app/business/users/fullname', [BusinessTripController::class, 'getUsersFullName']);
+
 
 });

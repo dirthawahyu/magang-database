@@ -4,7 +4,11 @@ namespace App\Http\Controllers\Api\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\BusinessTrip;
+use App\Models\City;
+use App\Models\Company;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class BusinessTripController extends Controller
 {
@@ -42,4 +46,101 @@ class BusinessTripController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function store(Request $request): JsonResponse
+    {
+        $validatedData = $request->validate([
+            'id_company' => 'required|exists:companies,id',
+            'id_city' => 'required|exists:cities,id',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'departure_from' => 'required|string',
+            'pic' => 'required|string',
+            'pic_role' => 'required|string',
+            'pic_phone' => 'required|string',
+            'extend_day' => 'nullable|integer',
+            'id_user' => 'required|array',
+            'id_user.*' => 'exists:users,id',
+        ]);
+
+        try {
+            $company = Company::findOrFail($validatedData['id_company']);
+            $city = City::findOrFail($validatedData['id_city']);
+
+            $businessTrip = BusinessTrip::create([
+                'id_company_city' => $validatedData['id_company_city'],
+                // Assuming this is a reference to a pivot table
+                'start_date' => $validatedData['start_date'],
+                'end_date' => $validatedData['end_date'],
+                'departure_from' => $validatedData['departure_from'],
+                'pic' => $validatedData['pic'],
+                'pic_role' => $validatedData['pic_role'],
+                'pic_phone' => $validatedData['pic_phone'],
+                'extend_day' => $validatedData['extend_day'] ?? 0,
+            ]);
+
+            $businessTrip->users()->sync($validatedData['id_user']);
+
+            return response()->json(['message' => 'Business trip created successfully', 'data' => $businessTrip], 201);
+        } catch (\Exception $e) {
+            // Tangani error
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function company()
+    {
+        $company = Company::all();
+
+        return response()->json($company);
+    }
+
+    public function city()
+    {
+        $city = City::all();
+
+        return response()->json($city);
+    }
+
+    public function updateExtendDay(Request $request, $id): JsonResponse
+    {
+        $validatedData = $request->validate([
+            'extend_day' => 'required|integer',
+        ]);
+
+        try {
+            // Cari BusinessTrip berdasarkan ID
+            $businessTrip = BusinessTrip::findOrFail($id);
+
+            // Update extend day
+            $businessTrip->extend_day = $validatedData['extend_day'];
+            $businessTrip->save();
+
+            return response()->json(['message' => 'Extend day updated successfully', 'data' => $businessTrip], 200);
+        } catch (\Exception $e) {
+            // Tangani error
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getUsersFullName(): JsonResponse
+{
+    try {
+        $users = User::all(); // Ambil semua data user
+
+        $formattedUsers = $users->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'full_name' => $user->full_name, 
+            ];
+        });
+
+        return response()->json($formattedUsers, 200);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
+
+
+
 }
