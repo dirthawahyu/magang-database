@@ -189,6 +189,119 @@ class BusinessTripController extends Controller
         }
     }
 
+    public function getNominalPlanning(Request $request): JsonResponse
+    {
+        try {
+            $planningData = DB::table('planning_realization_header')
+                ->join('category_expenditure', 'planning_realization_header.id_category_expenditure', '=', 'category_expenditure.id')
+                ->select('id_category_expenditure', 'category_expenditure.name as category_expenditure_name', 'planning_realization_header.keterangan', 'planning_realization_header.nominal_planning')
+                ->get();
+
+            return response()->json($planningData, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getNominalRealization(Request $request): JsonResponse
+    {
+        try {
+            $planningData = DB::table('planning_realization_header')
+                ->join('category_expenditure', 'planning_realization_header.id_category_expenditure', '=', 'category_expenditure.id')
+                ->select('id_category_expenditure', 'category_expenditure.name as category_expenditure_name', 'planning_realization_header.keterangan', 'planning_realization_header.nominal_realization')
+                ->get();
+
+            return response()->json($planningData, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function calculate(Request $request, $id): JsonResponse
+    {
+        try {
+            // Convert the ID from the request to integer
+            $idBusinessTrip = (int) $id;
+
+            // Fetch total nominal planning as float
+            $totalPlanning = DB::table('planning_realization_header')
+                ->where('id_business_trip', $idBusinessTrip)
+                ->sum(DB::raw('CAST(nominal_planning AS DECIMAL(15,2))'));
+
+            // Fetch total nominal realization as float
+            $totalRealization = DB::table('planning_realization_header')
+                ->where('id_business_trip', $idBusinessTrip)
+                ->sum(DB::raw('CAST(nominal_realization AS DECIMAL(15,2))'));
+
+            // Calculate the difference
+            $difference = $totalPlanning - $totalRealization;
+
+            return response()->json([
+                'id_business_trip' => $idBusinessTrip,
+                'total_nominal_planning' => number_format($totalPlanning, 2, ',', '.'),
+                'total_nominal_realization' => number_format($totalRealization, 2, ',', '.'),
+                'difference' => number_format($difference, 2, ',', '.'),
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getPercentage($id): JsonResponse
+    {
+        try {
+            $categories = DB::table('planning_realization_header')
+                ->select('id_category_expenditure')
+                ->where('id_business_trip', $id)
+                ->groupBy('id_category_expenditure')
+                ->get();
+
+            $results = [];
+
+            foreach ($categories as $category) {
+                $totalPlanning = DB::table('planning_realization_header')
+                    ->where('id_business_trip', $id)
+                    ->where('id_category_expenditure', $category->id_category_expenditure)
+                    ->get()
+                    ->sum(function ($row) {
+                        $nominalPlanning = str_replace(['.', ','], ['', '.'], $row->nominal_planning);
+                        return (float) $nominalPlanning;
+                    });
+
+                $totalRealization = DB::table('planning_realization_header')
+                    ->where('id_business_trip', $id)
+                    ->where('id_category_expenditure', $category->id_category_expenditure)
+                    ->get()
+                    ->sum(function ($row) {
+                        $nominalRealization = str_replace(['.', ','], ['', '.'], $row->nominal_realization);
+                        return (float) $nominalRealization;
+                    });
+
+                // Menghitung persentase
+                $percentage = $totalPlanning > 0
+                    ? (($totalPlanning - $totalRealization) / $totalPlanning) * 100
+                    : 0;
+
+                // Mendapatkan nama kategori
+                $categoryName = DB::table('category_expenditure')
+                    ->where('id', $category->id_category_expenditure)
+                    ->value('name');
+
+                $results[] = [
+                    'id_category_expenditure' => $category->id_category_expenditure,
+                    'category_name' => $categoryName,
+                    'total_nominal_planning' => number_format($totalPlanning, 2, ',', '.'),
+                    'total_nominal_realization' => number_format($totalRealization, 2, ',', '.'),
+                    'percentage' => number_format($percentage, 2, ',', '.'),
+                ];
+            }
+
+            return response()->json($results, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
 
 
 }
