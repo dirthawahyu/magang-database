@@ -190,12 +190,17 @@ class BusinessTripController extends Controller
         }
     }
 
-    public function getNominalPlanning(Request $request): JsonResponse
+    public function getNominalPlanning(Request $request, $id): JsonResponse
     {
         try {
+            // Convert the ID from the request to integer
+            $idBusinessTrip = (int) $id;
+
+            // Fetch planning data based on the business trip ID
             $planningData = DB::table('planning_realization_header')
                 ->join('category_expenditure', 'planning_realization_header.id_category_expenditure', '=', 'category_expenditure.id')
                 ->select('id_category_expenditure', 'category_expenditure.name as category_expenditure_name', 'planning_realization_header.keterangan', 'planning_realization_header.nominal_planning')
+                ->where('id_business_trip', $idBusinessTrip)
                 ->get();
 
             return response()->json($planningData, 200);
@@ -204,15 +209,20 @@ class BusinessTripController extends Controller
         }
     }
 
-    public function getNominalRealization(Request $request): JsonResponse
+    public function getNominalRealization(Request $request, $id): JsonResponse
     {
         try {
-            $planningData = DB::table('planning_realization_header')
+            // Convert the ID from the request to integer
+            $idBusinessTrip = (int) $id;
+
+            // Fetch realization data based on the business trip ID
+            $realizationData = DB::table('planning_realization_header')
                 ->join('category_expenditure', 'planning_realization_header.id_category_expenditure', '=', 'category_expenditure.id')
                 ->select('id_category_expenditure', 'category_expenditure.name as category_expenditure_name', 'planning_realization_header.keterangan', 'planning_realization_header.nominal_realization')
+                ->where('id_business_trip', $idBusinessTrip)
                 ->get();
 
-            return response()->json($planningData, 200);
+            return response()->json($realizationData, 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
