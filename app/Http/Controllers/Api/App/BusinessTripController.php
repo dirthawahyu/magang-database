@@ -10,8 +10,8 @@ use App\Models\CompanyCity;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 
@@ -226,17 +226,32 @@ class BusinessTripController extends Controller
         }
     }
 
+    public function getCategories(): JsonResponse
+    {
+        try {
+            $categories = DB::table('category_expenditure')
+                ->select('id', 'name') // Sesuaikan dengan kolom yang ada di tabel Anda
+                ->get();
+
+            return response()->json($categories, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+
     public function getNominalPlanning(Request $request, $id): JsonResponse
     {
         try {
-            // Convert the ID from the request to integer
+            // Konversi ID dari permintaan menjadi integer
             $idBusinessTrip = (int) $id;
 
-            // Fetch planning data based on the business trip ID
+            // Mengambil data perencanaan berdasarkan ID perjalanan bisnis
             $planningData = DB::table('planning_realization_header')
                 ->join('category_expenditure', 'planning_realization_header.id_category_expenditure', '=', 'category_expenditure.id')
-                ->select('id_category_expenditure', 'category_expenditure.name as category_expenditure_name', 'planning_realization_header.keterangan', 'planning_realization_header.nominal_planning')
+                ->select('id_category_expenditure', 'category_expenditure.name as category_expenditure_name', 'planning_realization_header.keterangan', 'planning_realization_header.nominal')
                 ->where('id_business_trip', $idBusinessTrip)
+                ->where('type', 1) // Hanya mengambil data yang memiliki type 1 (Estimasi)
                 ->get();
 
             return response()->json($planningData, 200);
@@ -245,17 +260,19 @@ class BusinessTripController extends Controller
         }
     }
 
+
     public function getNominalRealization(Request $request, $id): JsonResponse
     {
         try {
-            // Convert the ID from the request to integer
+            // Konversi ID dari permintaan menjadi integer
             $idBusinessTrip = (int) $id;
 
-            // Fetch realization data based on the business trip ID
+            // Mengambil data realisasi berdasarkan ID perjalanan bisnis
             $realizationData = DB::table('planning_realization_header')
                 ->join('category_expenditure', 'planning_realization_header.id_category_expenditure', '=', 'category_expenditure.id')
-                ->select('id_category_expenditure', 'category_expenditure.name as category_expenditure_name', 'planning_realization_header.keterangan', 'planning_realization_header.nominal_realization')
+                ->select('id_category_expenditure', 'category_expenditure.name as category_expenditure_name', 'planning_realization_header.keterangan', 'planning_realization_header.nominal')
                 ->where('id_business_trip', $idBusinessTrip)
+                ->where('type', 0) // Hanya mengambil data yang memiliki type 0 (Realisasi)
                 ->get();
 
             return response()->json($realizationData, 200);
@@ -264,23 +281,93 @@ class BusinessTripController extends Controller
         }
     }
 
+    public function addRealization(Request $request): JsonResponse
+    {
+        try {
+            $validatedData = $request->validate([
+                'id_business_trip' => 'required|integer',
+                'id_category_expenditure' => 'required|integer',
+                'nominal' => 'required|numeric',
+                'photo_proof' => 'nullable|file|mimes:jpeg,png,jpg|max:2048',
+                // Validate file
+                'keterangan' => 'nullable|string',
+            ]);
+
+            // Menyimpan file jika ada
+            if ($request->hasFile('photo_proof')) {
+                $file = $request->file('photo_proof');
+                $filePath = $file->store('public/photo_proofs'); // Simpan di storage
+                $validatedData['photo_proof'] = $filePath;
+            }
+
+            // Menambahkan data ke tabel dengan type = 0 (Realisasi)
+            $validatedData['type'] = 0;
+
+            $id = DB::table('planning_realization_header')->insertGetId($validatedData);
+
+            return response()->json([
+                'message' => 'Data added successfully',
+                'id' => $id
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+
+
+    public function updateRealization(Request $request, $id): JsonResponse
+    {
+        try {
+            // Validasi data yang diterima
+            $validatedData = $request->validate([
+                'keterangan' => 'nullable|string',
+                'nominal' => 'nullable|numeric',
+                'photo_proof' => 'nullable|string',
+            ]);
+
+            // Mengupdate data di tabel hanya jika type adalah 0 (Realisasi)
+            $updated = DB::table('planning_realization_header')
+                ->where('id', $id)
+                ->where('type', 0) // Pastikan hanya memperbarui data realisasi
+                ->update($validatedData);
+
+            if ($updated) {
+                return response()->json([
+                    'message' => 'Data updated successfully',
+                ], 200);
+            } else {
+                return response()->json([
+                    'message' => 'No data found with the given ID or type does not match',
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+
+
+
     public function calculate(Request $request, $id): JsonResponse
     {
         try {
-            // Convert the ID from the request to integer
+            // Konversi ID dari permintaan menjadi integer
             $idBusinessTrip = (int) $id;
 
-            // Fetch total nominal planning as float
+            // Mengambil total nominal planning (estimasi)
             $totalPlanning = DB::table('planning_realization_header')
                 ->where('id_business_trip', $idBusinessTrip)
-                ->sum(DB::raw('CAST(nominal_planning AS DECIMAL(15,2))'));
+                ->where('type', 1) // 1 berarti estimasi
+                ->sum(DB::raw('CAST(nominal AS DECIMAL(15,2))'));
 
-            // Fetch total nominal realization as float
+            // Mengambil total nominal realization (realisasi)
             $totalRealization = DB::table('planning_realization_header')
                 ->where('id_business_trip', $idBusinessTrip)
-                ->sum(DB::raw('CAST(nominal_realization AS DECIMAL(15,2))'));
+                ->where('type', 0) // 0 berarti realisasi
+                ->sum(DB::raw('CAST(nominal AS DECIMAL(15,2))'));
 
-            // Calculate the difference
+            // Menghitung selisih
             $difference = $totalPlanning - $totalRealization;
 
             return response()->json([
@@ -294,9 +381,11 @@ class BusinessTripController extends Controller
         }
     }
 
+
     public function getPercentage($id): JsonResponse
     {
         try {
+            // Mengambil semua kategori berdasarkan ID perjalanan bisnis
             $categories = DB::table('planning_realization_header')
                 ->select('id_category_expenditure')
                 ->where('id_business_trip', $id)
@@ -306,23 +395,19 @@ class BusinessTripController extends Controller
             $results = [];
 
             foreach ($categories as $category) {
+                // Mengambil total nominal untuk estimasi (type 1)
                 $totalPlanning = DB::table('planning_realization_header')
                     ->where('id_business_trip', $id)
                     ->where('id_category_expenditure', $category->id_category_expenditure)
-                    ->get()
-                    ->sum(function ($row) {
-                        $nominalPlanning = str_replace(['.', ','], ['', '.'], $row->nominal_planning);
-                        return (float) $nominalPlanning;
-                    });
+                    ->where('type', 1) // 1 berarti estimasi
+                    ->sum(DB::raw('CAST(nominal AS DECIMAL(15,2))'));
 
+                // Mengambil total nominal untuk realisasi (type 0)
                 $totalRealization = DB::table('planning_realization_header')
                     ->where('id_business_trip', $id)
                     ->where('id_category_expenditure', $category->id_category_expenditure)
-                    ->get()
-                    ->sum(function ($row) {
-                        $nominalRealization = str_replace(['.', ','], ['', '.'], $row->nominal_realization);
-                        return (float) $nominalRealization;
-                    });
+                    ->where('type', 0) // 0 berarti realisasi
+                    ->sum(DB::raw('CAST(nominal AS DECIMAL(15,2))'));
 
                 // Menghitung persentase
                 $percentage = $totalPlanning > 0
@@ -348,4 +433,5 @@ class BusinessTripController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
 }
