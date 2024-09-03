@@ -7,11 +7,13 @@ use App\Models\BusinessTrip;
 use App\Models\City;
 use App\Models\Company;
 use App\Models\CompanyCity;
+use App\Models\PlanningRealizationHeader;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -316,7 +318,7 @@ class BusinessTripController extends Controller
             // Mengambil data realisasi berdasarkan ID perjalanan bisnis
             $realizationData = DB::table('planning_realization_header')
                 ->join('category_expenditure', 'planning_realization_header.id_category_expenditure', '=', 'category_expenditure.id')
-                ->select('id_category_expenditure', 'category_expenditure.name as category_expenditure_name', 'planning_realization_header.keterangan', 'planning_realization_header.nominal')
+                ->select('planning_realization_header.id', 'id_category_expenditure', 'category_expenditure.name as category_expenditure_name', 'planning_realization_header.keterangan', 'planning_realization_header.nominal')
                 ->where('id_business_trip', $idBusinessTrip)
                 ->where('type', 0) // Hanya mengambil data yang memiliki type 0 (Realisasi)
                 ->get();
@@ -394,61 +396,44 @@ class BusinessTripController extends Controller
     }
 
 
-    public function updateRealization(Request $request, $id): JsonResponse
+    public function updateRealization(Request $request, $id)
     {
+        $validatedData = $request->validate([
+            'keterangan' => 'required|string',
+            'nominal' => 'required|integer',
+            'photo_proof' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validasi file yang diupload
+        ]);
+
         try {
-            // Validasi data yang diterima
-            $validatedData = $request->validate([
-                'keterangan' => 'nullable|string',
-                'nominal' => 'nullable|numeric',
-                'photo_proof' => 'nullable|file|mimes:jpeg,png,jpg|max:2048', // Validasi file
-            ]);
+            $realization = PlanningRealizationHeader::findOrFail($id);
 
-            // Mendapatkan data yang ada untuk memastikan data file
-            $existingRecord = DB::table('planning_realization_header')
-                ->where('id', $id)
-                ->where('type', 0) // Pastikan hanya memperbarui data realisasi
-                ->first();
-
-            if (!$existingRecord) {
-                return response()->json([
-                    'message' => 'No data found with the given ID or type does not match',
-                ], 404);
-            }
-
-            // Menyimpan file jika ada
             if ($request->hasFile('photo_proof')) {
-                // Hapus file lama jika ada
-                if ($existingRecord->photo_proof) {
-                    Storage::delete('public/photo_proofs/' . $existingRecord->photo_proof);
+                // Menghapus foto lama jika ada
+                if ($realization->photo_proof) {
+                    // Menghapus foto lama dari direktori penyimpanan
+                    Storage::delete('public/photo_proofs/' . $realization->photo_proof);
                 }
 
-                // Simpan file baru
+                // Simpan foto baru dengan nama acak
                 $file = $request->file('photo_proof');
-                $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('public/photo_proofs', $filename);
-                $validatedData['photo_proof'] = $filename; // Simpan nama file, bukan path
-            } else {
-                $validatedData['photo_proof'] = $existingRecord->photo_proof; // Pertahankan nama file yang ada jika tidak ada file baru
+                $filename = Str::random(10) . '.' . $file->getClientOriginalExtension(); // Nama acak dengan ekstensi asli
+                $path = $file->storeAs('public/photo_proofs', $filename); // Simpan file dengan nama acak
+
+                // Update rea$realization dengan nama file baru
+                $realization->photo_proof = $filename;
             }
 
-            // Mengupdate data di tabel
-            DB::table('planning_realization_header')
-                ->where('id', $id)
-                ->where('type', 0)
-                ->update($validatedData);
 
-            return response()->json([
-                'message' => 'Data updated successfully',
-            ], 200);
+            $realization->keterangan = $validatedData['keterangan'];
+            $realization->nominal = $validatedData['nominal'];
+            $realization->save();
+
+            return response()->json(['message' => 'Data updated successfully', 'data' => $realization], 200);
         } catch (\Exception $e) {
+            // Tangani error
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
-
-
-
 
     public function calculate(Request $request, $id): JsonResponse
     {
@@ -534,5 +519,4 @@ class BusinessTripController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
 }

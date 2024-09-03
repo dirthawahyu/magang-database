@@ -72,11 +72,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/business/calculate/{id}', [BusinessTripController::class, 'calculate']);
     Route::get('app/business/percentage/{id}', [BusinessTripController::class, 'getPercentage']);
     Route::post('app/business/add', [BusinessTripController::class, 'addRealization']);
-    Route::put('app/business/update/{id}', [BusinessTripController::class, 'updateRealization']);
+    Route::post('app/business/update/{id}', [BusinessTripController::class, 'updateRealization']);
     Route::get('app/business/categories', [BusinessTripController::class, 'getCategories']);
     Route::get('app/business/realizationid/{id}', [BusinessTripController::class, 'getNominalRealizationById']);
     Route::post('app/business/upload-file/{id}', [BusinessTripController::class, 'uploadFile']);
     Route::get('app/business/triptoday', [BusinessTripController::class, 'getTripsStartingToday']);
-
-
 });
