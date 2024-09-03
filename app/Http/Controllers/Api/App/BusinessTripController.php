@@ -8,6 +8,7 @@ use App\Models\City;
 use App\Models\Company;
 use App\Models\CompanyCity;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -85,6 +86,51 @@ class BusinessTripController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function getTripsStartingToday(): JsonResponse
+    {
+        try {
+            // Mendapatkan tanggal hari ini
+            $today = Carbon::now()->startOfDay();
+
+            // Mengambil data perjalanan bisnis yang memiliki start_date sama dengan hari ini
+            $tripDetails = BusinessTrip::with(['companyCity.company', 'companyCity.city', 'users'])
+                ->whereDate('start_date', $today)
+                ->get();
+
+            // Format data perjalanan bisnis
+            $formattedTripDetails = $tripDetails->map(function ($trip) {
+                return [
+                    'id_business_trip' => $trip->id,
+                    'company_name' => $trip->companyCity->company->name ?? 'N/A',
+                    'city_name' => optional($trip->companyCity->city)->name ?? 'N/A',
+                    'start_date' => $trip->start_date,
+                    'end_date' => $trip->end_date,
+                    'status' => $trip->status,
+                    'note' => $trip->note,
+                    'company_address' => optional($trip->companyCity)->address ?? 'N/A',
+                    'photo_document' => $trip->photo_document,
+                    'departure_from' => $trip->departure_from,
+                    'pic' => optional($trip->companyCity)->pic ?? 'N/A',
+                    'pic_role' => optional($trip->companyCity)->pic_role ?? 'N/A',
+                    'pic_phone' => optional($trip->companyCity)->pic_phone ?? 'N/A',
+                    'extend_day' => $trip->extend_day,
+                    'users' => $trip->users->map(function ($user) {
+                        return [
+                            'id' => $user->id,
+                            'full_name' => $user->full_name,
+                        ];
+                    }),
+                ];
+            });
+
+            return response()->json($formattedTripDetails);
+        } catch (\Exception $e) {
+            // Tangani error
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
 
     public function store(Request $request): JsonResponse
     {
