@@ -32,7 +32,7 @@ Route::post('register', \App\Http\Controllers\Api\Auth\RegisterController::class
 Route::post('app/login', [LoginController::class, 'loginApp']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/user', [LoginController::class, 'fetch'])->name('fetch');
-    
+
     //Profile
     Route::get('app/profile', [ProfileController::class, 'index']);
     Route::get('app/profile/{id}', [ProfileController::class, 'show']);
@@ -57,7 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/leave/category', [LeaveController::class, 'leaveCategory']);
     Route::put('app/leave/update/{id}', [LeaveController::class, 'updateStatus']);
     Route::delete('app/leave/{id}', [LeaveController::class, 'destroy']);
-    
+
     //Business Trip
     Route::get('app/business/', [BusinessTripController::class, 'getAllTripDetails']);
     Route::get('app/business/company', [BusinessTripController::class, 'company']);
@@ -71,10 +71,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/business/realization/{id}', [BusinessTripController::class, 'getNominalRealization']);
     Route::get('app/business/calculate/{id}', [BusinessTripController::class, 'calculate']);
     Route::get('app/business/percentage/{id}', [BusinessTripController::class, 'getPercentage']);
-    Route::post('app/business/upload-file/{id}', [BusinessTripController::class, 'uploadFile']);
     Route::post('app/business/add', [BusinessTripController::class, 'addRealization']);
     Route::put('app/business/update/{id}', [BusinessTripController::class, 'updateRealization']);
     Route::get('app/business/categories', [BusinessTripController::class, 'getCategories']);
+    Route::get('app/business/realizationid/{id}', [BusinessTripController::class, 'getNominalRealizationById']);
+    Route::post('app/business/upload-file/{id}', [BusinessTripController::class, 'uploadFile']);
 
 
 });
