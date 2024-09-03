@@ -10,10 +10,45 @@ use App\Models\CompanyCity;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
 
 class BusinessTripController extends Controller
 {
+
+    public function uploadFile(Request $request, $id)
+    {
+        $request->validate([
+            'file' => 'required|mimes:jpg,jpeg,png,pdf|max:2048',
+        ]);
+
+        // Mendapatkan instance BusinessTrip berdasarkan ID
+        $trip = BusinessTrip::find($id);
+
+        // Menghapus file lama jika ada
+        if ($trip->photo_document) {
+            Storage::delete('public/photo_document/' . $trip->photo_document);
+        }
+
+        // Mengunggah file baru
+        $file = $request->file('file');
+        $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
+        $file->storeAs('public/photo_document', $filename);
+
+        // Memperbarui path file di database
+        $trip->photo_document = $filename;
+        $trip->save();
+
+        return response()->json([
+            'message' => 'File uploaded successfully',
+            'file_name' => $filename // Kembalikan nama file yang diunggah
+        ]);
+    }
+
+
+
     public function getAllTripDetails(): JsonResponse
     {
         try {
@@ -29,6 +64,7 @@ class BusinessTripController extends Controller
                     'status' => $trip->status,
                     'note' => $trip->note,
                     'company_address' => optional($trip->companyCity)->address ?? 'N/A',
+                    'photo_document' => $trip->photo_document,
                     'departure_from' => $trip->departure_from,
                     'pic' => optional($trip->companyCity)->pic ?? 'N/A',
                     'pic_role' => optional($trip->companyCity)->pic_role ?? 'N/A',
@@ -312,7 +348,4 @@ class BusinessTripController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
-
-
 }
