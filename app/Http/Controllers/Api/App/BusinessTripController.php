@@ -294,7 +294,8 @@ class BusinessTripController extends Controller
                     'planning_realization_header.id_category_expenditure',
                     'category_expenditure.name as category_expenditure_name',
                     'planning_realization_header.keterangan',
-                    'planning_realization_header.nominal'
+                    'planning_realization_header.nominal',
+                    'planning_realization_header.photo_proof'
                 )
                 ->where('planning_realization_header.id', $idRealizationHeader)
                 ->first(); // Gunakan first() karena hanya mencari satu record berdasarkan ID
