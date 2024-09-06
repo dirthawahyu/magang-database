@@ -96,4 +96,14 @@ class User extends Authenticatable
     {
         return "{$this->first_name} {$this->last_name}";
     }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'id_company');
+    }
+
+    public function checkinActivities()
+    {
+        return $this->hasMany(CheckinActivity::class, 'id_user');
+    }
 }

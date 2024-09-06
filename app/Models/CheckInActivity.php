@@ -2,32 +2,26 @@
 
 namespace App\Models;
 
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Employee extends Model
+class CheckinActivity extends Model
 {
     use HasFactory;
 
-    protected $table = 'employee';
+    protected $table = 'checkin_activity'; 
+
     protected $fillable = [
         'id_user',
-        'id_role',
-        'id_employee_group',
-        'id_company',
-        'status',
-        'tax_status',
-        'nip',
+        'time',
+        'type',
+        'latitude',
+        'longtitude',
     ];
 
+  
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
-    }
-
-    public function company()
-    {
-        return $this->belongsTo(Company::class, 'id_company');
     }
 }

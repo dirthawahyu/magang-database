@@ -15,6 +15,8 @@ class Company extends Model
     // Kolom yang dapat diisi secara massal
     protected $fillable = [
         'name',
+        'latitude',
+        'longtitude',
     ];
 
     // Relasi dengan model lain jika ada
@@ -22,5 +24,9 @@ class Company extends Model
     {
         return $this->hasMany(CompanyCity::class, 'id_company');
     }
-}
 
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
+}

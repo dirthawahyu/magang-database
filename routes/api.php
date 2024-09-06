@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\App\BusinessTripController;
+use App\Http\Controllers\Api\App\CheckInActivityController;
 use App\Http\Controllers\Api\App\ContractController;
 use App\Http\Controllers\Api\App\EditController;
 use App\Http\Controllers\Api\App\LeaveController;
@@ -77,4 +78,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/business/realizationid/{id}', [BusinessTripController::class, 'getNominalRealizationById']);
     Route::post('app/business/upload-file/{id}', [BusinessTripController::class, 'uploadFile']);
     Route::get('app/business/triptoday', [BusinessTripController::class, 'getTripsStartingToday']);
+
+    Route::post('app/checkin', [CheckInActivityController::class, 'checkIn']);
+
 });
