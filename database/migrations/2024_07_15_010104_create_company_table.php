@@ -13,13 +13,15 @@ class CreateCompanyTable extends Migration
         Schema::create('company', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->timestamps();            
+            $table->float('latitude');
+            $table->float('longtitude');
+            $table->timestamps();
         });
 
         DB::table('company')->insert([
-            ['name' => 'PT Surya'],
-            ['name' => 'PT Jaya'],
-            ['name' => 'PT Anugrah'],
+            ['name' => 'PT Tata Niaga', 'latitude' => -7.2555061, 'longtitude' => 112.6700275],
+            ['name' => 'PT Surya', 'latitude' => 37.77493, 'longtitude' => -122.41942],
+            ['name' => 'PT Jaya', 'latitude' => -7.340671, 'longtitude' => 112.7364161],
         ]);
     }
 

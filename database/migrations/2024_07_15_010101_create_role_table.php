@@ -13,14 +13,17 @@ class CreateRoleTable extends Migration
         Schema::create('role', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->integer('priority');
             $table->timestamps();
         });
 
         DB::table('role')->insert([
-            ['name' => 'Supervisor',],
-            ['name' => 'Senior',],
-            ['name' => 'Junior',],
-            ['name' => 'Internship',],
+            ['name' => 'Supervisor', 'priority' => 1],
+            ['name' => 'Senior', 'priority' => 1],
+            ['name' => 'Junior', 'priority' => 2],
+            ['name' => 'Internship', 'priority' => 2],
+            ['name' => 'part_time', 'priority' => 3],
+            ['name' => 'magang', 'priority' => 3],
         ]);
         
     }

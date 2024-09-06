@@ -13,7 +13,6 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -140,7 +139,7 @@ class BusinessTripController extends Controller
             'id_company_city' => 'required|exists:company_city,id',
             'note' => 'required|string',
             'start_date' => 'required|date',
-            'end_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
             'departure_from' => 'required|string',
             'extend_day' => 'nullable|integer',
         ]);
