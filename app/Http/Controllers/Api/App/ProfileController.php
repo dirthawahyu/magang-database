@@ -48,6 +48,8 @@ class ProfileController extends Controller
         }
 
         $roleName = $user->employee ? Role::find($user->employee->id_role)->name : null;
+        $rolePriority = $user->employee ? Role::find($user->employee->id_role)->priority : null;
+
         $employeeGroupName = $user->employee ? EmployeeGroup::find($user->employee->id_employee_group)->code : null;
 
         $profile = [
@@ -60,6 +62,7 @@ class ProfileController extends Controller
             'email' => $user->email,
             'profile_photo' => $user->profile_photo,
             'role' => $roleName,
+            'priority' => $rolePriority,
             'employee_group' => $employeeGroupName,
             'nip' => $user->employee->nip
         ];
