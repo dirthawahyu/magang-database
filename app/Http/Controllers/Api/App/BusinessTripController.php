@@ -36,7 +36,11 @@ class BusinessTripController extends Controller
 
         // Mengunggah file baru
         $file = $request->file('file');
-        $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
+
+        // Membuat nama file dengan format docsyyMMddhhmm
+        $filename = 'docs' . date('ymdHi') . '.' . $file->getClientOriginalExtension();
+
+        // Menyimpan file dengan nama baru
         $file->storeAs('public/photo_document', $filename);
 
         // Memperbarui path file di database
@@ -48,6 +52,7 @@ class BusinessTripController extends Controller
             'file_name' => $filename // Kembalikan nama file yang diunggah
         ]);
     }
+
 
 
 
