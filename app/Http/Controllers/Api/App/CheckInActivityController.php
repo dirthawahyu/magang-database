@@ -35,20 +35,24 @@ class CheckInActivityController extends Controller
             ->first();
 
         if ($existingCheckin) {
+            // Jika sudah check-in (type == 0), tambahkan check-out
             if ($existingCheckin->type == 0) {
-                // Jika sudah check-in, tambahkan data baru untuk check-out
+                $checkOutTime = now();
                 CheckinActivity::create([
                     'id_user' => $user->id,
-                    'time' => now(),
+                    'time' => $checkOutTime,
                     'type' => 1,
                     // Type 1 untuk check-out
                     'latitude' => $request->latitude,
                     'longtitude' => $request->longtitude,
                 ]);
 
-                return response()->json(['message' => 'Check-out berhasil'], 200);
+                return response()->json([
+                    'message' => 'Check-out berhasil',
+                    'check_out_time' => $checkOutTime->format('H:i') // Mengembalikan waktu check-out
+                ], 200);
             } elseif ($existingCheckin->type == 1) {
-                // Jika sudah check-out, tolak check-in atau check-out
+                // Jika sudah check-out, tolak check-in atau check-out berikutnya
                 return response()->json(['message' => 'Anda sudah melakukan check-out hari ini'], 400);
             }
         }
@@ -78,16 +82,20 @@ class CheckInActivityController extends Controller
 
         if ($distance <= $distanceLimit) {
             // Simpan check-in jika jaraknya kurang dari limit
+            $checkInTime = now();
             CheckinActivity::create([
                 'id_user' => $user->id,
-                'time' => now(),
+                'time' => $checkInTime,
                 'type' => 0,
                 // Type 0 untuk check-in
                 'latitude' => $request->latitude,
                 'longtitude' => $request->longtitude,
             ]);
 
-            return response()->json(['message' => 'Check-in berhasil'], 200);
+            return response()->json([
+                'message' => 'Check-in berhasil',
+                'check_in_time' => $checkInTime->format('H:i') // Mengembalikan waktu check-in
+            ], 200);
         }
 
         // Jika jaraknya lebih dari limit
