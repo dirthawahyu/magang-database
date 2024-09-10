@@ -80,5 +80,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/business/triptoday', [BusinessTripController::class, 'getTripsStartingToday']);
 
     Route::post('app/checkin', [CheckInActivityController::class, 'checkIn']);
+    Route::get('app/checkin/today/{user}', [CheckinActivityController::class, 'getTodayActivities']);
 
 });

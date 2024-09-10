@@ -7,9 +7,24 @@ use App\Models\CheckinActivity;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class CheckInActivityController extends Controller
 {
+    public function getTodayActivities($user)
+    {
+        // Mendapatkan tanggal hari ini
+        $today = Carbon::today();
+
+        // Query untuk mendapatkan semua data checkin_activity hari ini untuk user tertentu
+        $activities = CheckinActivity::where('id_user', $user)
+            ->whereDate('time', $today)
+            ->get();
+
+        // Return data dalam bentuk JSON
+        return response()->json($activities);
+    }
+
     public function checkIn(Request $request)
     {
         // Validasi input latitude dan longtitude
@@ -73,8 +88,10 @@ class CheckInActivityController extends Controller
 
         // Hitung jarak dari lokasi user ke lokasi company
         $distance = $this->calculateDistance(
-            $company->latitude, $company->longtitude,
-            $request->latitude, $request->longtitude
+            $company->latitude,
+            $company->longtitude,
+            $request->latitude,
+            $request->longtitude
         );
 
         // Tentukan limit jarak (misalnya 1 km)
