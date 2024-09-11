@@ -27,10 +27,10 @@ class CreateCompanyTable extends Migration
 
     public function down()
     {
-        Schema::table('city', function (Blueprint $table) {
-            // Drop foreign key constraints
-            $table->dropForeign(['id_city']);
-        });
+        // Schema::table('city', function (Blueprint $table) {
+        //     // Drop foreign key constraints
+        //     $table->dropForeign(['id_city']);
+        // });
 
         Schema::dropIfExists('company');
     }

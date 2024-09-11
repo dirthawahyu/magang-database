@@ -42,8 +42,7 @@ class CreateLeaveTable extends Migration
     {
         Schema::table('leave', function (Blueprint $table) {
             // Drop foreign key constraints
-            $table->dropForeign(['id_user']);
-            $table->dropForeign(['id_master_category']);
+            $table->dropForeign(['id_leave_category']);
         });
 
         Schema::dropIfExists('leave');

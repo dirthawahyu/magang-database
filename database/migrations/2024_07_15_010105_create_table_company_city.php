@@ -36,14 +36,14 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::table('company', function (Blueprint $table) {
-            // Drop foreign key constraints
-            $table->dropForeign(['id_company']);
-        });
-        Schema::table('city', function (Blueprint $table) {
-            // Drop foreign key constraints
-            $table->dropForeign(['id_city']);
-        });
+        // Schema::table('company', function (Blueprint $table) {
+        //     // Drop foreign key constraints
+        //     $table->dropForeign(['id_company']);
+        // });
+        // Schema::table('city', function (Blueprint $table) {
+        //     // Drop foreign key constraints
+        //     $table->dropForeign(['id_city']);
+        // });
 
         Schema::dropIfExists('company_city');
     }
