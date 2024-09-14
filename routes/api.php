@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\App\ContractController;
 use App\Http\Controllers\Api\App\EditController;
 use App\Http\Controllers\Api\App\LeaveController;
 use App\Http\Controllers\Api\App\LoginController;
+use App\Http\Controllers\Api\App\OtpController;
 use App\Http\Controllers\Api\App\PasswordController;
 use App\Http\Controllers\Api\App\PayrollController;
 use App\Http\Controllers\Api\App\ProfileController;
@@ -77,9 +78,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/business/categories', [BusinessTripController::class, 'getCategories']);
     Route::get('app/business/realizationid/{id}', [BusinessTripController::class, 'getNominalRealizationById']);
     Route::post('app/business/upload-file/{id}', [BusinessTripController::class, 'uploadFile']);
-    Route::get('app/business/triptoday', [BusinessTripController::class, 'getTripsStartingToday']);
+    Route::get('app/business/trip-today', [BusinessTripController::class, 'getTripsStartingToday']);
 
+    //Check In
     Route::post('app/checkin', [CheckInActivityController::class, 'checkIn']);
     Route::get('app/checkin/today/{user}', [CheckinActivityController::class, 'getTodayActivities']);
+
+    //Otp
+    Route::post('app/otp/send', [OtpController::class, 'sendOtp']);
+    Route::post('app/otp/verify', [OtpController::class, 'verifyOtp']);
 
 });
