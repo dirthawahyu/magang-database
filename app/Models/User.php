@@ -32,6 +32,7 @@ class User extends Authenticatable
         'religion',
         'birth_date',
         'phone_number',
+        'username',
         'email',
         'password',
         'gender_status',

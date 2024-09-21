@@ -14,25 +14,30 @@ class RegisterController extends Controller
      */
     public function __invoke(Request $request)
     {
+        // Validasi field yang digunakan saat register
         $request->validate([
             'first_name' => ['required', 'min:3'],
             'last_name' => ['required', 'min:3'],
             'email' => ['required', 'email', 'unique:users,email'],
+            'username' => ['required', 'unique:users,username'], // Username unik
             'password' => ['required', 'min:8'],
         ]);
 
+        // Membuat user baru dengan field yang sesuai
         $register = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
-            'profile_photo' => "http://127.0.0.1:8000/storage/kucing1.jpeg",
+            'username' => $request->username, // Menyimpan username
             'password' => Hash::make($request->password),
         ]);
 
-         $token = $register->createToken('hrd-app')->plainTextToken;
+        // Membuat token untuk user yang baru dibuat
+        $token = $register->createToken('hrd-app')->plainTextToken;
 
+        // Mengembalikan response token
         return response()->json([
-            'token' => $token
+            'token' => $token,
         ]);
     }
 }

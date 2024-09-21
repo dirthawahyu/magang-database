@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('religion')->nullable();
             $table->date('birth_date')->nullable();
             $table->string('phone_number')->nullable();
+            $table->string('username')->unique();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
@@ -49,6 +50,7 @@ return new class extends Migration
                 'religion' => 'Islam',
                 'birth_date' => '1990-01-01',
                 'phone_number' => '08123456789',
+                'username' => 'testname',
                 'email' => 'test@gmail.com',
                 'email_verified_at' => now(),
                 'password' => Hash::make('12345678'),

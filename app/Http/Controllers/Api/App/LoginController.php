@@ -18,27 +18,32 @@ class LoginController extends Controller
         try {
             // Validate request
             $request->validate([
-                'email' => ['required', 'email'],
+                'username' => ['required'], // Username sebagai input
                 'password' => ['required'],
             ]);
 
-            // Find user by email
-            $user = User::where('email', $request->email)->firstOrFail();
-            if (!Hash::check($request->password, $user->password)) {
-                throw new Exception('Invalid password');
+            // Find user by username
+            $user = User::where('username', $request->username)->first();
+            if (!$user || !Hash::check($request->password, $user->password)) {
+                return response()->json([
+                    'message' => 'Username atau password salah'
+                ], 401); 
             }
 
             // Generate token
             $tokenResult = $user->createToken('authToken')->plainTextToken;
 
             // Return response
-            return ResponseFormatter::success([
+            return response()->json([
                 'access_token' => $tokenResult,
                 'token_type' => 'Bearer',
                 'user' => $user
-            ], 'Login success');
+            ], 200); // Status sukses sebagai integer (200)
         } catch (Exception $e) {
-            return ResponseFormatter::error($e->getMessage());
+            return response()->json([
+                'message' => 'Login gagal',
+                'error' => $e->getMessage()
+            ], 500); // Status server error sebagai integer (500)
         }
     }
 
@@ -48,7 +53,9 @@ class LoginController extends Controller
         $token = $request->user()->currentAccessToken()->delete();
 
         // Return response
-        return ResponseFormatter::success($token, 'Logout success');
+        return response()->json([
+            'message' => 'Logout sukses'
+        ], 200); // Status sukses sebagai integer (200)
     }
 
     public function fetch(Request $request)
@@ -57,6 +64,6 @@ class LoginController extends Controller
         $user = $request->user();
 
         // Return response
-        return ResponseFormatter::success($user, 'Fetch success');
+        return response()->json($user, 200); // Status sukses sebagai integer (200)
     }
 }
