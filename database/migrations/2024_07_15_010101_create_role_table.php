@@ -19,11 +19,12 @@ class CreateRoleTable extends Migration
 
         DB::table('role')->insert([
             ['name' => 'Supervisor', 'priority' => 1],
-            ['name' => 'Senior', 'priority' => 1],
-            ['name' => 'Junior', 'priority' => 2],
-            ['name' => 'Internship', 'priority' => 2],
-            ['name' => 'part_time', 'priority' => 3],
-            ['name' => 'magang', 'priority' => 3],
+            ['name' => 'admin', 'priority' => 2],
+            ['name' => 'Senior', 'priority' => 3],
+            ['name' => 'Junior', 'priority' => 4],
+            ['name' => 'Internship', 'priority' => 5],
+            ['name' => 'part_time', 'priority' => 6],
+            ['name' => 'magang', 'priority' => 7],
         ]);
         
     }

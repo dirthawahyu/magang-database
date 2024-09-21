@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 
 class BusinessTripController extends Controller
@@ -53,14 +54,36 @@ class BusinessTripController extends Controller
         ]);
     }
 
-
-
-
-    public function getAllTripDetails(): JsonResponse
+    public function getAllTripDetails(Request $request): JsonResponse
     {
         try {
-            $tripDetails = BusinessTrip::with(['companyCity.company', 'companyCity.city', 'users'])->get();
+            // Ambil ID user yang login
+            $userId = $request->user()->id;
 
+            // Ambil role dari tabel employee berdasarkan user
+            $userRole = DB::table('employee')
+                ->where('id_user', $userId)
+                ->value('id_role');
+
+            // Ambil priority role
+            $rolePriority = DB::table('role')
+                ->where('id', $userRole)
+                ->value('priority');
+
+            // Jika role priority kurang dari 2, ambil semua trip
+            if ($rolePriority < 2) {
+                $tripDetails = BusinessTrip::with(['companyCity.company', 'companyCity.city', 'users'])->get();
+            } else {
+                // Jika role priority 2 atau lebih, ambil hanya trip yang dimiliki oleh pengguna
+                $tripDetails = BusinessTrip::with(['companyCity.company', 'companyCity.city', 'users'])
+                    ->whereHas('users', function ($query) use ($userId) {
+                        $query->where('users.id', $userId); // Tambahkan alias tabel
+                    })
+                    ->get();
+
+            }
+
+            // Format data trip
             $formattedTripDetails = $tripDetails->map(function ($trip) {
                 return [
                     'id_business_trip' => $trip->id,
@@ -88,10 +111,11 @@ class BusinessTripController extends Controller
 
             return response()->json($formattedTripDetails);
         } catch (\Exception $e) {
-            // Tangani error
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+
 
     public function getTripsStartingToday(): JsonResponse
     {

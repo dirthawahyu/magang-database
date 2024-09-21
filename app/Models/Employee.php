@@ -30,4 +30,10 @@ class Employee extends Model
     {
         return $this->belongsTo(Company::class, 'id_company');
     }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
 }
