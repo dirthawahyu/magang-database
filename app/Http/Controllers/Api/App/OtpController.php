@@ -50,13 +50,10 @@ class OtpController extends Controller
         $isValid = $this->otpService->validateOtp($user->id, $otp);
 
         if ($isValid) {
-            return response()->json([
-                'message' => 'OTP valid.'
-            ]);
+            return response()->json(['message' => 'OTP valid.']);
         } else {
-            return response()->json([
-                'message' => 'OTP tidak valid atau sudah kadaluarsa.'
-            ], 400);
+            return response()->json(['message' => 'OTP tidak valid atau sudah kadaluarsa.'], 400);
         }
     }
+
 }

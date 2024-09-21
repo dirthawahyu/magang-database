@@ -3,59 +3,66 @@
 namespace App\Http\Controllers\Api\App;
 
 use App\Http\Controllers\Controller;
-use App\Helper\ResponseFormatter;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
-    //
+    protected $otpController;
+
+    public function __construct(OtpController $otpController)
+    {
+        $this->otpController = $otpController;
+    }
+
     public function loginApp(Request $request)
     {
         try {
-            // Validate request
+            // Validasi permintaan
             $request->validate([
-                'username' => ['required'], // Username sebagai input
+                'username' => ['required'],
                 'password' => ['required'],
             ]);
 
-            // Find user by username
+            // Mencari pengguna berdasarkan username
             $user = User::where('username', $request->username)->first();
             if (!$user || !Hash::check($request->password, $user->password)) {
-                return response()->json([
-                    'message' => 'Username atau password salah'
-                ], 401); 
+                return response()->json(['message' => 'Username atau password salah'], 401);
             }
 
-            // Generate token
+            // Menghasilkan token
             $tokenResult = $user->createToken('authToken')->plainTextToken;
 
-            // Return response
+            // Mengatur request untuk mengirim OTP
+            $otpRequest = new Request();
+            $otpRequest->setUserResolver(function () use ($user) {
+                return $user;
+            });
+
+            // Memanggil metode sendOtp dari OtpController
+            $otpResponse = $this->otpController->sendOtp($otpRequest);
+
+            // Mengembalikan respons
             return response()->json([
                 'access_token' => $tokenResult,
                 'token_type' => 'Bearer',
-                'user' => $user
-            ], 200); // Status sukses sebagai integer (200)
+                'user' => $user,
+                'otp_message' => $otpResponse->original['message'] // Ambil pesan OTP
+            ], 200);
         } catch (Exception $e) {
-            return response()->json([
-                'message' => 'Login gagal',
-                'error' => $e->getMessage()
-            ], 500); // Status server error sebagai integer (500)
+            return response()->json(['message' => 'Login gagal', 'error' => $e->getMessage()], 500);
         }
     }
 
     public function logout(Request $request)
     {
         // Revoke Token
-        $token = $request->user()->currentAccessToken()->delete();
+        $request->user()->currentAccessToken()->delete();
 
         // Return response
-        return response()->json([
-            'message' => 'Logout sukses'
-        ], 200); // Status sukses sebagai integer (200)
+        return response()->json(['message' => 'Logout sukses'], 200);
     }
 
     public function fetch(Request $request)
@@ -64,6 +71,6 @@ class LoginController extends Controller
         $user = $request->user();
 
         // Return response
-        return response()->json($user, 200); // Status sukses sebagai integer (200)
+        return response()->json($user, 200);
     }
 }

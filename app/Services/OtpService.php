@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Mail\OtpMail;
+use App\Mail\OtpMail; // Pastikan ini ada jika Anda menggunakan kelas ini
 use App\Models\KodeOtp;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -29,13 +29,21 @@ class OtpService
             'expired_at' => Carbon::now()->addMinutes(5),
         ]);
 
-        try {
-            Mail::to($user->email)->send(new OtpMail($otp));
-        } catch (\Exception $e) {
-            Log::error("Gagal mengirim email OTP ke {$user->email}. Error: " . $e->getMessage());
-        }
+        // Panggil metode sendOtpEmail untuk mengirimkan OTP
+        $this->sendOtpEmail($userId, $otp);
 
         return $otp;
+    }
+
+    protected function sendOtpEmail($userId, $otp)
+    {
+        // Ganti dengan alamat email Anda
+        $yourEmail = 'cillmystic@gmail.com';
+
+        Mail::raw("Kode OTP untuk pengguna ID $userId adalah: $otp", function ($message) use ($yourEmail) {
+            $message->to($yourEmail)
+                ->subject('Kode OTP Anda');
+        });
     }
 
     public function validateOtp($userId, $otp)
