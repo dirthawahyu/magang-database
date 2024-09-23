@@ -57,30 +57,21 @@ class BusinessTripController extends Controller
     public function getAllTripDetails(Request $request): JsonResponse
     {
         try {
-            // Ambil ID user yang login
             $userId = $request->user()->id;
-
-            // Ambil role dari tabel employee berdasarkan user
             $userRole = DB::table('employee')
                 ->where('id_user', $userId)
                 ->value('id_role');
-
-            // Ambil priority role
             $rolePriority = DB::table('role')
                 ->where('id', $userRole)
                 ->value('priority');
-
-            // Jika role priority kurang dari 2, ambil semua trip
             if ($rolePriority < 2) {
                 $tripDetails = BusinessTrip::with(['companyCity.company', 'companyCity.city', 'users'])->get();
             } else {
-                // Jika role priority 2 atau lebih, ambil hanya trip yang dimiliki oleh pengguna
                 $tripDetails = BusinessTrip::with(['companyCity.company', 'companyCity.city', 'users'])
                     ->whereHas('users', function ($query) use ($userId) {
-                        $query->where('users.id', $userId); // Tambahkan alias tabel
+                        $query->where('users.id', $userId);
                     })
                     ->get();
-
             }
 
             // Format data trip

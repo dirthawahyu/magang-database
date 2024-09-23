@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Leave;
 use App\Models\LeaveCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LeaveController extends Controller
 {
@@ -70,23 +71,33 @@ class LeaveController extends Controller
             'status' => 'nullable|string',
         ]);
 
-        $userId = auth()->user()->id;
-
-        // Menyimpan data cuti baru
-        $leave = new Leave();
-        $leave->id_user = $userId;
-        $leave->id_leave_category = $request->id_leave_category;
-        $leave->reason_for_leave = $request->reason_for_leave;
-        $leave->start_date = $request->start_date;
-        $leave->end_date = $request->end_date;
-        $leave->status = 'pending'; // Ini bisa null
-        $leave->save();
-
-        return response()->json([
-            'message' => 'Leave created successfully.',
-            'leave' => $leave
-        ], 201);
+        try {
+            $userId = auth()->user()->id;
+            $userRole = DB::table('employee')
+                ->where('id_user', $userId)
+                ->value('id_role');
+            $rolePriority = DB::table('role')
+                ->where('id', $userRole)
+                ->value('priority');
+            $status = $rolePriority < 2 ? 'approved' : 'pending';
+            $leave = new Leave();
+            $leave->id_user = $userId;
+            $leave->id_leave_category = $request->id_leave_category;
+            $leave->reason_for_leave = $request->reason_for_leave;
+            $leave->start_date = $request->start_date;
+            $leave->end_date = $request->end_date;
+            $leave->status = $status;
+            $leave->save();
+            return response()->json([
+                'message' => 'Leave created successfully.',
+                'leave' => $leave
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
+
+
 
     public function getByUserId($userId)
     {
