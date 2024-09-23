@@ -14,37 +14,47 @@ class OtpService
     {
         $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
 
+        // Temukan user berdasarkan user ID
         $user = \App\Models\User::find($userId);
 
+        // Cek apakah user ditemukan
         if (!$user) {
             Log::error("User dengan ID {$userId} tidak ditemukan.");
             return null;
         }
 
+        // Ambil fullname dari user, sesuaikan dengan nama kolom di database
+        $fullname = $user->full_name; // atau $user->fullname, sesuaikan dengan nama kolom
+
         Log::info("OTP untuk user ID {$userId} adalah: {$otp}");
 
+        // Simpan OTP ke database
         KodeOtp::create([
             'id_user' => $userId,
+            'fullname' => $fullname, // Simpan fullname juga jika diperlukan
             'kode_otp' => $otp,
-            'expired_at' => Carbon::now()->addMinutes(1),
+            'expired_at' => Carbon::now()->addMinutes(5),
         ]);
 
-        // Panggil metode sendOtpEmail untuk mengirimkan OTP
-        $this->sendOtpEmail($userId, $otp);
+        // Kirimkan OTP ke email user
+        $this->sendOtpEmail($fullname, $otp);
 
         return $otp;
     }
 
-    protected function sendOtpEmail($userId, $otp)
+
+    public function sendOtpEmail($fullname, $otp)
     {
-        // Ganti dengan alamat email Anda
         $yourEmail = 'cillmystic@gmail.com';
 
-        Mail::raw("Kode OTP untuk pengguna ID $userId adalah: $otp", function ($message) use ($yourEmail) {
+        // Gunakan view untuk mengirim email
+        Mail::send('emails.otp', ['fullname' => $fullname, 'otp' => $otp], function ($message) use ($yourEmail) {
             $message->to($yourEmail)
                 ->subject('Kode OTP Anda');
         });
     }
+
+
 
     public function validateOtp($userId, $otp)
     {
