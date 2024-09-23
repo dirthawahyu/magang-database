@@ -26,7 +26,7 @@ class OtpService
         KodeOtp::create([
             'id_user' => $userId,
             'kode_otp' => $otp,
-            'expired_at' => Carbon::now()->addMinutes(5),
+            'expired_at' => Carbon::now()->addMinutes(1),
         ]);
 
         // Panggil metode sendOtpEmail untuk mengirimkan OTP

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\App;
 use App\Http\Controllers\Controller;
 use App\Services\OtpService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache; // Impor Cache yang benar
 
 class OtpController extends Controller
 {
@@ -26,10 +27,23 @@ class OtpController extends Controller
             return response()->json(['error' => 'User ID not found'], 400);
         }
 
+        // Cek apakah ada cache untuk OTP user
+        $cacheKey = 'otp_sent_' . $user->id;
+        if (Cache::has($cacheKey)) { // Tanpa backslash
+            $remainingTime = Cache::get($cacheKey) - time();
+            return response()->json([
+                'error' => 'OTP sudah dikirim. Coba lagi dalam ' . $remainingTime . ' detik.',
+            ], 429);
+        }
+
+        // Generate OTP baru
         $otp = $this->otpService->generateOtp($user->id);
         if (!$otp) {
             return response()->json(['error' => 'Failed to generate OTP'], 500);
         }
+
+        // Set cache dengan timeout 1 menit
+        Cache::put($cacheKey, time() + 60, 60); // Tanpa backslash
 
         return response()->json([
             'message' => 'Kode OTP telah dikirim ke email.',
@@ -55,5 +69,4 @@ class OtpController extends Controller
             return response()->json(['message' => 'OTP tidak valid atau sudah kadaluarsa.'], 400);
         }
     }
-
 }
