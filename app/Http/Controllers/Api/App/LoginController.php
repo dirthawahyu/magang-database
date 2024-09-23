@@ -7,6 +7,7 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class LoginController extends Controller
 {
@@ -32,6 +33,16 @@ class LoginController extends Controller
                 return response()->json(['message' => 'Username atau password salah'], 401);
             }
 
+            // Cek status karyawan pada tabel employee
+            $employee = DB::table('employee')
+                ->where('id_user', $user->id)
+                ->where('status', 'Active')
+                ->first();
+
+            if (!$employee) {
+                return response()->json(['message' => 'Karyawan tidak aktif'], 403);
+            }
+
             // Menghasilkan token
             $tokenResult = $user->createToken('authToken')->plainTextToken;
 
@@ -55,6 +66,7 @@ class LoginController extends Controller
             return response()->json(['message' => 'Login gagal', 'error' => $e->getMessage()], 500);
         }
     }
+
 
     public function logout(Request $request)
     {
