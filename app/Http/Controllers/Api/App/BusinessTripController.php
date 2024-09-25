@@ -4,11 +4,7 @@ namespace App\Http\Controllers\Api\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\BusinessTrip;
-use App\Models\City;
-use App\Models\Company;
-use App\Models\CompanyCity;
 use App\Models\PlanningRealizationHeader;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,37 +16,23 @@ use Illuminate\Support\Facades\Auth;
 
 class BusinessTripController extends Controller
 {
-
     public function uploadFile(Request $request, $id)
     {
         $request->validate([
             'file' => 'required|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
-
-        // Mendapatkan instance BusinessTrip berdasarkan ID
         $trip = BusinessTrip::find($id);
-
-        // Menghapus file lama jika ada
         if ($trip->photo_document) {
             Storage::delete('public/photo_document/' . $trip->photo_document);
         }
-
-        // Mengunggah file baru
         $file = $request->file('file');
-
-        // Membuat nama file dengan format docsyyMMddhhmm
         $filename = 'docs' . date('ymdHi') . '.' . $file->getClientOriginalExtension();
-
-        // Menyimpan file dengan nama baru
         $file->storeAs('public/photo_document', $filename);
-
-        // Memperbarui path file di database
         $trip->photo_document = $filename;
         $trip->save();
-
         return response()->json([
             'message' => 'File uploaded successfully',
-            'file_name' => $filename // Kembalikan nama file yang diunggah
+            'file_name' => $filename
         ]);
     }
 
@@ -64,7 +46,7 @@ class BusinessTripController extends Controller
             $rolePriority = DB::table('role')
                 ->where('id', $userRole)
                 ->value('priority');
-            if ($rolePriority < 2) {
+            if ($rolePriority < 3) {
                 $tripDetails = BusinessTrip::with(['companyCity.company', 'companyCity.city', 'users'])->get();
             } else {
                 $tripDetails = BusinessTrip::with(['companyCity.company', 'companyCity.city', 'users'])
@@ -73,8 +55,6 @@ class BusinessTripController extends Controller
                     })
                     ->get();
             }
-
-            // Format data trip
             $formattedTripDetails = $tripDetails->map(function ($trip) {
                 return [
                     'id_business_trip' => $trip->id,
@@ -99,27 +79,19 @@ class BusinessTripController extends Controller
                     }),
                 ];
             });
-
             return response()->json($formattedTripDetails);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
-
 
     public function getTripsStartingToday(): JsonResponse
     {
         try {
-            // Mendapatkan tanggal hari ini
             $today = Carbon::now()->startOfDay();
-
-            // Mengambil data perjalanan bisnis yang memiliki start_date sama dengan hari ini
             $tripDetails = BusinessTrip::with(['companyCity.company', 'companyCity.city', 'users'])
                 ->whereDate('start_date', $today)
                 ->get();
-
-            // Format data perjalanan bisnis
             $formattedTripDetails = $tripDetails->map(function ($trip) {
                 return [
                     'id_business_trip' => $trip->id,
@@ -144,14 +116,11 @@ class BusinessTripController extends Controller
                     }),
                 ];
             });
-
             return response()->json($formattedTripDetails);
         } catch (\Exception $e) {
-            // Tangani error
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
 
     public function store(Request $request): JsonResponse
     {
@@ -163,11 +132,7 @@ class BusinessTripController extends Controller
             'departure_from' => 'required|string',
             'extend_day' => 'nullable|integer',
         ]);
-
         try {
-
-
-            // Buat BusinessTrip baru
             $businessTrip = BusinessTrip::create([
                 'id_company_city' => $validatedData['id_company_city'] ?? '',
                 'note' => $validatedData['note'] ?? '',
@@ -177,7 +142,6 @@ class BusinessTripController extends Controller
                 'departure_from' => $validatedData['departure_from'],
                 'extend_day' => $validatedData['extend_day'] ?? 0,
             ]);
-
             return response()->json([
                 'message' => 'Business trip created successfully',
                 'data' => $businessTrip
@@ -194,16 +158,13 @@ class BusinessTripController extends Controller
             'id_user' => 'required|array',
             'id_user.*' => 'exists:users,id',
         ]);
-
         try {
-            // Simpan detail perjalanan ke dalam tabel trip_detail
             foreach ($validatedData['id_user'] as $userId) {
                 DB::table('trip_detail')->updateOrInsert(
                     ['id_user' => $userId, 'id_business_trip' => $validatedData['id_business_trip']],
                     ['created_at' => now(), 'updated_at' => now()]
                 );
             }
-
             return response()->json([
                 'message' => 'Trip details added successfully'
             ], 201);
@@ -212,82 +173,16 @@ class BusinessTripController extends Controller
         }
     }
 
-
-    public function company()
-    {
-        $company = Company::all();
-
-        return response()->json($company);
-    }
-
-    public function city()
-    {
-        $city = City::all();
-
-        return response()->json($city);
-    }
-
     public function updateExtendDay(Request $request, $id): JsonResponse
     {
         $validatedData = $request->validate([
             'extend_day' => 'required|integer',
         ]);
-
         try {
-            // Cari BusinessTrip berdasarkan ID
             $businessTrip = BusinessTrip::findOrFail($id);
-
-            // Update extend day
             $businessTrip->extend_day = $validatedData['extend_day'];
             $businessTrip->save();
-
             return response()->json(['message' => 'Extend day updated successfully', 'data' => $businessTrip], 200);
-        } catch (\Exception $e) {
-            // Tangani error
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
-
-    public function getUsersFullName(): JsonResponse
-    {
-        try {
-            $users = User::all(); // Ambil semua data user
-
-            $formattedUsers = $users->map(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'full_name' => $user->full_name,
-                ];
-            });
-
-            return response()->json($formattedUsers, 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
-
-    public function getCompanyCity(): JsonResponse
-    {
-        try {
-            // Mengambil data dari tabel company_city beserta informasi terkait company dan city
-            $companyCities = CompanyCity::with(['company', 'city'])->get();
-
-            // Memformat data untuk output JSON
-            $formattedCompanyCities = $companyCities->map(function ($companyCity) {
-                return [
-                    'id' => $companyCity->id,
-                    'id_company' => $companyCity->company->id ?? 'N/A',
-                    'company_name' => $companyCity->company->name ?? 'N/A',
-                    'id_city' => $companyCity->city->id ?? 'N/A',
-                    'city_name' => $companyCity->city->name ?? 'N/A',
-                    'address' => $companyCity->address,
-                    'pic' => $companyCity->pic,
-                    'pic_role' => $companyCity->pic_role,
-                    'pic_phone' => $companyCity->pic_phone,
-                ];
-            });
-
-            return response()->json($formattedCompanyCities, 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -297,51 +192,40 @@ class BusinessTripController extends Controller
     {
         try {
             $categories = DB::table('category_expenditure')
-                ->select('id', 'name') // Sesuaikan dengan kolom yang ada di tabel Anda
+                ->select('id', 'name')
                 ->get();
-
             return response()->json($categories, 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
-
     public function getNominalPlanning(Request $request, $id): JsonResponse
     {
         try {
-            // Konversi ID dari permintaan menjadi integer
             $idBusinessTrip = (int) $id;
-
-            // Mengambil data perencanaan berdasarkan ID perjalanan bisnis
             $planningData = DB::table('planning_realization_header')
                 ->join('category_expenditure', 'planning_realization_header.id_category_expenditure', '=', 'category_expenditure.id')
                 ->select('id_category_expenditure', 'category_expenditure.name as category_expenditure_name', 'planning_realization_header.keterangan', 'planning_realization_header.nominal')
                 ->where('id_business_trip', $idBusinessTrip)
-                ->where('type', 1) // Hanya mengambil data yang memiliki type 1 (Estimasi)
+                ->where('type', 1) 
                 ->get();
-
             return response()->json($planningData, 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
-
     public function getNominalRealization(Request $request, $id): JsonResponse
     {
         try {
-            // Konversi ID dari permintaan menjadi integer
             $idBusinessTrip = (int) $id;
-
-            // Mengambil data realisasi berdasarkan ID perjalanan bisnis
             $realizationData = DB::table('planning_realization_header')
                 ->join('category_expenditure', 'planning_realization_header.id_category_expenditure', '=', 'category_expenditure.id')
                 ->select('planning_realization_header.id', 'id_category_expenditure', 'category_expenditure.name as category_expenditure_name', 'planning_realization_header.keterangan', 'planning_realization_header.nominal')
                 ->where('id_business_trip', $idBusinessTrip)
-                ->where('type', 0) // Hanya mengambil data yang memiliki type 0 (Realisasi)
+                ->where('type', 0)
                 ->get();
-
             return response()->json($realizationData, 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -351,10 +235,7 @@ class BusinessTripController extends Controller
     public function getNominalRealizationById(Request $request, $id): JsonResponse
     {
         try {
-            // Konversi ID dari permintaan menjadi integer
             $idRealizationHeader = (int) $id;
-
-            // Mengambil data realisasi berdasarkan ID header realisasi
             $realizationData = DB::table('planning_realization_header')
                 ->join('category_expenditure', 'planning_realization_header.id_category_expenditure', '=', 'category_expenditure.id')
                 ->select(
@@ -365,8 +246,7 @@ class BusinessTripController extends Controller
                     'planning_realization_header.photo_proof'
                 )
                 ->where('planning_realization_header.id', $idRealizationHeader)
-                ->first(); // Gunakan first() karena hanya mencari satu record berdasarkan ID
-
+                ->first(); 
             if ($realizationData) {
                 return response()->json($realizationData, 200);
             } else {
@@ -377,11 +257,9 @@ class BusinessTripController extends Controller
         }
     }
 
-
     public function addRealization(Request $request): JsonResponse
     {
         try {
-            // Validasi data yang diterima
             $validatedData = $request->validate([
                 'id_business_trip' => 'required|integer',
                 'id_category_expenditure' => 'required|integer',
@@ -389,22 +267,16 @@ class BusinessTripController extends Controller
                 'photo_proof' => 'nullable|file|mimes:jpeg,png,jpg|max:2048',
                 'keterangan' => 'nullable|string',
             ]);
-
-            // Menyimpan file jika ada
             if ($request->hasFile('photo_proof')) {
                 $file = $request->file('photo_proof');
                 $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('public/photo_proofs', $filename); // Simpan di storage
-                $validatedData['photo_proof'] = $filename; // Simpan nama file, bukan path
+                $file->storeAs('public/photo_proofs', $filename); 
+                $validatedData['photo_proof'] = $filename;
             } else {
-                $validatedData['photo_proof'] = null; // Jika tidak ada file, set ke null
+                $validatedData['photo_proof'] = null; 
             }
-
-            // Menambahkan data ke tabel dengan type = 0 (Realisasi)
             $validatedData['type'] = 0;
-
             $id = DB::table('planning_realization_header')->insertGetId($validatedData);
-
             return response()->json([
                 'message' => 'Data added successfully',
                 'id' => $id
@@ -414,42 +286,29 @@ class BusinessTripController extends Controller
         }
     }
 
-
     public function updateRealization(Request $request, $id)
     {
         $validatedData = $request->validate([
             'keterangan' => 'required|string',
             'nominal' => 'required|integer',
-            'photo_proof' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validasi file yang diupload
+            'photo_proof' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-
         try {
             $realization = PlanningRealizationHeader::findOrFail($id);
-
             if ($request->hasFile('photo_proof')) {
-                // Menghapus foto lama jika ada
                 if ($realization->photo_proof) {
-                    // Menghapus foto lama dari direktori penyimpanan
                     Storage::delete('public/photo_proofs/' . $realization->photo_proof);
                 }
-
-                // Simpan foto baru dengan nama acak
                 $file = $request->file('photo_proof');
-                $filename = Str::random(10) . '.' . $file->getClientOriginalExtension(); // Nama acak dengan ekstensi asli
-                $path = $file->storeAs('public/photo_proofs', $filename); // Simpan file dengan nama acak
-
-                // Update rea$realization dengan nama file baru
+                $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('public/photo_proofs', $filename);
                 $realization->photo_proof = $filename;
             }
-
-
             $realization->keterangan = $validatedData['keterangan'];
             $realization->nominal = $validatedData['nominal'];
             $realization->save();
-
             return response()->json(['message' => 'Data updated successfully', 'data' => $realization], 200);
         } catch (\Exception $e) {
-            // Tangani error
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -457,24 +316,16 @@ class BusinessTripController extends Controller
     public function calculate(Request $request, $id): JsonResponse
     {
         try {
-            // Konversi ID dari permintaan menjadi integer
             $idBusinessTrip = (int) $id;
-
-            // Mengambil total nominal planning (estimasi)
             $totalPlanning = DB::table('planning_realization_header')
                 ->where('id_business_trip', $idBusinessTrip)
-                ->where('type', 1) // 1 berarti estimasi
+                ->where('type', 1)
                 ->sum(DB::raw('CAST(nominal AS DECIMAL(15,2))'));
-
-            // Mengambil total nominal realization (realisasi)
             $totalRealization = DB::table('planning_realization_header')
                 ->where('id_business_trip', $idBusinessTrip)
-                ->where('type', 0) // 0 berarti realisasi
+                ->where('type', 0)
                 ->sum(DB::raw('CAST(nominal AS DECIMAL(15,2))'));
-
-            // Menghitung selisih
             $difference = $totalPlanning - $totalRealization;
-
             return response()->json([
                 'id_business_trip' => $idBusinessTrip,
                 'total_nominal_planning' => number_format($totalPlanning, 2, ',', '.'),
@@ -486,44 +337,32 @@ class BusinessTripController extends Controller
         }
     }
 
-
     public function getPercentage($id): JsonResponse
     {
         try {
-            // Mengambil semua kategori berdasarkan ID perjalanan bisnis
             $categories = DB::table('planning_realization_header')
                 ->select('id_category_expenditure')
                 ->where('id_business_trip', $id)
                 ->groupBy('id_category_expenditure')
                 ->get();
-
             $results = [];
-
             foreach ($categories as $category) {
-                // Mengambil total nominal untuk estimasi (type 1)
                 $totalPlanning = DB::table('planning_realization_header')
                     ->where('id_business_trip', $id)
                     ->where('id_category_expenditure', $category->id_category_expenditure)
-                    ->where('type', 1) // 1 berarti estimasi
+                    ->where('type', 1) 
                     ->sum(DB::raw('CAST(nominal AS DECIMAL(15,2))'));
-
-                // Mengambil total nominal untuk realisasi (type 0)
                 $totalRealization = DB::table('planning_realization_header')
                     ->where('id_business_trip', $id)
                     ->where('id_category_expenditure', $category->id_category_expenditure)
-                    ->where('type', 0) // 0 berarti realisasi
+                    ->where('type', 0)
                     ->sum(DB::raw('CAST(nominal AS DECIMAL(15,2))'));
-
-                // Menghitung persentase
                 $percentage = $totalPlanning > 0
                     ? (($totalPlanning - $totalRealization) / $totalPlanning) * 100
                     : 0;
-
-                // Mendapatkan nama kategori
                 $categoryName = DB::table('category_expenditure')
                     ->where('id', $category->id_category_expenditure)
                     ->value('name');
-
                 $results[] = [
                     'id_category_expenditure' => $category->id_category_expenditure,
                     'category_name' => $categoryName,
@@ -532,7 +371,6 @@ class BusinessTripController extends Controller
                     'percentage' => number_format($percentage, 2, ',', '.'),
                 ];
             }
-
             return response()->json($results, 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

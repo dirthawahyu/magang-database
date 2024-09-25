@@ -18,21 +18,17 @@ class EditController extends Controller
             'city' => 'required|string|max:255',
             'address' => 'required|string|max:255',
         ]);
-
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
-
         /** @var \App\Models\User $user **/
         $user = Auth::user();
-
         $user->first_name = $request->first_name;
         $user->last_name = $request->last_name;
         $user->phone_number = $request->phone_number;
         $user->city = $request->city;
         $user->address = $request->address;
         $user->save();
-
         return response()->json(['message' => 'Profile updated successfully'], 200);
     }
 }

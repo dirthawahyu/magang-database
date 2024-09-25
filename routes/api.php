@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\App\BusinessTripController;
 use App\Http\Controllers\Api\App\CheckInActivityController;
+use App\Http\Controllers\Api\App\CompanyCityController;
 use App\Http\Controllers\Api\App\ContractController;
 use App\Http\Controllers\Api\App\EditController;
 use App\Http\Controllers\Api\App\LeaveController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Api\App\OtpController;
 use App\Http\Controllers\Api\App\PasswordController;
 use App\Http\Controllers\Api\App\PayrollController;
 use App\Http\Controllers\Api\App\ProfileController;
+use App\Http\Controllers\Api\App\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -62,12 +64,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Business Trip
     Route::get('app/business/', [BusinessTripController::class, 'getAllTripDetails']);
-    Route::get('app/business/company', [BusinessTripController::class, 'company']);
-    Route::get('app/business/city', [BusinessTripController::class, 'city']);
     Route::put('app/business/extend/{id}', [BusinessTripController::class, 'updateExtendDay']);
-    Route::get('app/business/users/fullname', [BusinessTripController::class, 'getUsersFullName']);
     Route::post('app/business/make/', [BusinessTripController::class, 'store']);
-    Route::get('app/business/companycity', [BusinessTripController::class, 'getCompanyCity']);
     Route::post('app/business/trip', [BusinessTripController::class, 'storeTripDetail']);
     Route::get('app/business/planning/{id}', [BusinessTripController::class, 'getNominalPlanning']);
     Route::get('app/business/realization/{id}', [BusinessTripController::class, 'getNominalRealization']);
@@ -79,6 +77,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('app/business/realizationid/{id}', [BusinessTripController::class, 'getNominalRealizationById']);
     Route::post('app/business/upload-file/{id}', [BusinessTripController::class, 'uploadFile']);
     Route::get('app/business/trip-today', [BusinessTripController::class, 'getTripsStartingToday']);
+
+    //Company City
+    Route::get('app/companycity/company', [CompanyCityController::class, 'company']);
+    Route::get('app/companycity/city', [CompanyCityController::class, 'city']);
+    Route::get('app/companycity/companycity', [CompanyCityController::class, 'getCompanyCity']);
+
+
+    //User
+    Route::get('app/user/users/fullname', [UserController::class, 'getUsersFullName']);
+
 
     //Check In
     Route::post('app/checkin', [CheckInActivityController::class, 'checkIn']);

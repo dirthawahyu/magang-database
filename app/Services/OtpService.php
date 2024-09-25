@@ -12,8 +12,6 @@ class OtpService
 {
     public function generateOtp($userId)
     {
-        $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
-
         // Temukan user berdasarkan user ID
         $user = \App\Models\User::find($userId);
 
@@ -23,12 +21,20 @@ class OtpService
             return null;
         }
 
+        // Expire OTP sebelumnya yang belum kadaluarsa
+        KodeOtp::where('id_user', $userId)
+            ->where('expired_at', '>', Carbon::now())
+            ->update(['expired_at' => Carbon::now()]);
+
+        // Generate OTP baru
+        $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+
         // Ambil fullname dari user, sesuaikan dengan nama kolom di database
         $fullname = $user->full_name; // atau $user->fullname, sesuaikan dengan nama kolom
 
         Log::info("OTP untuk user ID {$userId} adalah: {$otp}");
 
-        // Simpan OTP ke database
+        // Simpan OTP baru ke database
         KodeOtp::create([
             'id_user' => $userId,
             'fullname' => $fullname, // Simpan fullname juga jika diperlukan
@@ -41,6 +47,7 @@ class OtpService
 
         return $otp;
     }
+
 
 
     public function sendOtpEmail($fullname, $otp)

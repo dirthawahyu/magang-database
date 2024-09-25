@@ -79,7 +79,7 @@ class LeaveController extends Controller
             $rolePriority = DB::table('role')
                 ->where('id', $userRole)
                 ->value('priority');
-            $status = $rolePriority < 2 ? 'approved' : 'pending';
+            $status = $rolePriority < 3 ? 'approved' : 'pending';
             $leave = new Leave();
             $leave->id_user = $userId;
             $leave->id_leave_category = $request->id_leave_category;

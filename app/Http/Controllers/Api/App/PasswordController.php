@@ -10,9 +10,6 @@ use Illuminate\Support\Facades\Hash;
 
 class PasswordController extends Controller
 {
-    /**
-     * Handle the change password request.
-     */
     public function changePassword(Request $request)
     {
         
@@ -24,18 +21,13 @@ class PasswordController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
-
         /** @var \App\Models\User $user **/
         $user = Auth::user();
-
         if (!Hash::check($request->current_password, $user->password)) {
             return response()->json(['message' => 'Current password is incorrect'], 400);
         }
-
         $user->password = Hash::make($request->new_password);
         $user->save();
-
         return response()->json(['message' => 'Password successfully changed'], 200);
     }
-    
 }
