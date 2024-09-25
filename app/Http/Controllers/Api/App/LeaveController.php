@@ -7,6 +7,9 @@ use App\Models\Leave;
 use App\Models\LeaveCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use App\Models\Employee;
+use Google_Client;
 
 class LeaveController extends Controller
 {
@@ -59,7 +62,6 @@ class LeaveController extends Controller
         ]);
     }
 
-
     public function store(Request $request)
     {
         // Validasi data input
@@ -79,7 +81,11 @@ class LeaveController extends Controller
             $rolePriority = DB::table('role')
                 ->where('id', $userRole)
                 ->value('priority');
+
+            // Set status
             $status = $rolePriority < 3 ? 'approved' : 'pending';
+
+            // Simpan data leave ke database
             $leave = new Leave();
             $leave->id_user = $userId;
             $leave->id_leave_category = $request->id_leave_category;
@@ -88,8 +94,23 @@ class LeaveController extends Controller
             $leave->end_date = $request->end_date;
             $leave->status = $status;
             $leave->save();
+
+            // Ambil employee dengan role 1 dan 2
+            $employeesToNotify = Employee::whereIn('id_role', [1, 2])->get();
+
+            // Kirim notifikasi ke employee yang role-nya 1 dan 2
+            foreach ($employeesToNotify as $employee) {
+                if ($employee->fcm_token) {
+                    $this->sendFCMNotification(
+                        $employee->fcm_token,
+                        "New Leave Request",
+                        "Employee with role 3, 4, 5, or 6 has requested leave."
+                    );
+                }
+            }
+
             return response()->json([
-                'message' => 'Leave created successfully.',
+                'message' => 'Leave created successfully, and notifications sent.',
                 'leave' => $leave
             ], 201);
         } catch (\Exception $e) {
@@ -97,6 +118,43 @@ class LeaveController extends Controller
         }
     }
 
+    private function sendFCMNotification($fcmToken, $title, $message)
+    {
+        // Ambil token akses dari Service Account
+        $accessToken = $this->getAccessToken();
+
+        // Mengirim request ke FCM API (V1)
+        $notification = [
+            'message' => [
+                'token' => $fcmToken,
+                'notification' => [
+                    'title' => $title,
+                    'body' => $message,
+                ],
+            ],
+        ];
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $accessToken,
+            'Content-Type' => 'application/json',
+        ])->post('https://fcm.googleapis.com/v1/projects/intern-nextbasis/messages:send', $notification);
+
+        return $response->json();
+    }
+
+    private function getAccessToken()
+    {
+        // Gantikan dengan jalur ke file JSON kredensial Service Account Anda
+        $serviceAccountPath = storage_path('app/firebase/serviceAccountKey.json');
+
+        // Ambil token akses menggunakan Google Client Library
+        $client = new \Google_Client();
+        $client->setAuthConfig($serviceAccountPath);
+        $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
+
+        $accessToken = $client->fetchAccessTokenWithAssertion();
+        return $accessToken['access_token'];
+    }
 
 
     public function getByUserId($userId)
@@ -177,6 +235,4 @@ class LeaveController extends Controller
             'message' => 'Leave deleted successfully.'
         ], 200);
     }
-
-
 }

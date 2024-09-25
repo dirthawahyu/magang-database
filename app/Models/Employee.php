@@ -16,6 +16,7 @@ class Employee extends Model
         'id_role',
         'id_employee_group',
         'id_company',
+        'fcm_token',
         'status',
         'tax_status',
         'nip',

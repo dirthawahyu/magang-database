@@ -86,7 +86,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //User
     Route::get('app/user/users/fullname', [UserController::class, 'getUsersFullName']);
-
+    Route::post('app/user/fcm-token', [UserController::class, 'saveFcmToken']);
+    Route::post('app/user/delete-fcm-token', [UserController::class, 'deleteFcmToken']);
 
     //Check In
     Route::post('app/checkin', [CheckInActivityController::class, 'checkIn']);

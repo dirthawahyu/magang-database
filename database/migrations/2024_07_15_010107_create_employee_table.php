@@ -15,6 +15,7 @@ class CreateEmployeeTable extends Migration
             $table->unsignedBigInteger('id_role');
             $table->unsignedBigInteger('id_employee_group');
             $table->unsignedBigInteger('id_company');
+            $table->string('fcm_token')->nullable();
             $table->enum('status', ['Active', 'Not Active'])->default('Not Active');
             $table->enum('tax_status', ['Active', 'Not Active'])->default('Not Active'); // Replace with actual status values
             $table->integer('nip');
