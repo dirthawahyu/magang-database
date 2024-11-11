@@ -15,6 +15,7 @@ class CheckinActivity extends Model
         'id_user',
         'time',
         'type',
+        'status',
         'latitude',
         'longtitude',
     ];
