@@ -14,14 +14,14 @@ class CreateCompanyTable extends Migration
             $table->id();
             $table->string('name');
             $table->float('latitude');
-            $table->float('longtitude');
+            $table->float('longitude');
             $table->timestamps();
         });
 
         DB::table('company')->insert([
-            ['name' => 'PT Tata Niaga', 'latitude' => -7.2555061, 'longtitude' => 112.6700275],
-            ['name' => 'PT Surya', 'latitude' => 37.77493, 'longtitude' => -122.41942],
-            ['name' => 'PT Jaya', 'latitude' => -7.340671, 'longtitude' => 112.7364161],
+            ['name' => 'PT Tata Niaga', 'latitude' => -7.2555061, 'longitude' => 112.6700275],
+            ['name' => 'PT Surya', 'latitude' => 37.77493, 'longitude' => -122.41942],
+            ['name' => 'PT Jaya', 'latitude' => -7.340671, 'longitude' => 112.7364161],
         ]);
     }
 

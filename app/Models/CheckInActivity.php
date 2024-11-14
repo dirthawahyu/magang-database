@@ -17,7 +17,8 @@ class CheckinActivity extends Model
         'type',
         'status',
         'latitude',
-        'longtitude',
+        'longitude',
+        'photo',
     ];
 
   

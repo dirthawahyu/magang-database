@@ -19,20 +19,21 @@ return new class extends Migration {
             $table->integer('type');
             $table->integer('status');
             $table->float('latitude');
-            $table->float('longtitude');
+            $table->float('longitude');
+            $table->text('photo');
             $table->timestamps();
 
             $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
         });
 
         DB::table('checkin_activity')->insert([
-            ['id_user' => 1, 'time' => '2024-08-10-07-24', 'type' => 0, 'status' => 0, 'latitude' => -7.340671, 'longtitude' => 112.7364161,
+            ['id_user' => 1, 'time' => '2024-08-10-07-24', 'type' => 0, 'status' => 0, 'latitude' => -7.340671, 'longitude' => 112.7364161,
             ],
-            ['id_user' => 1, 'time' => '2024-08-10-17-00', 'type' => 1, 'status' => 0, 'latitude' => -7.340671, 'longtitude' => 112.7364161,
+            ['id_user' => 1, 'time' => '2024-08-10-17-00', 'type' => 1, 'status' => 0, 'latitude' => -7.340671, 'longitude' => 112.7364161,
             ],
-            ['id_user' => 1, 'time' => '2024-08-10-07-24', 'type' => 0, 'status' => 1, 'latitude' => -7.340671, 'longtitude' => 112.7364161,
+            ['id_user' => 1, 'time' => '2024-08-10-07-24', 'type' => 0, 'status' => 1, 'latitude' => -7.340671, 'longitude' => 112.7364161,
             ],
-            ['id_user' => 1, 'time' => '2024-08-10-17-00', 'type' => 1, 'status' => 1, 'latitude' => -7.340671, 'longtitude' => 112.7364161,
+            ['id_user' => 1, 'time' => '2024-08-10-17-00', 'type' => 1, 'status' => 1, 'latitude' => -7.340671, 'longitude' => 112.7364161,
             ],
         ]);
     }

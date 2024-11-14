@@ -16,7 +16,7 @@ class Company extends Model
     protected $fillable = [
         'name',
         'latitude',
-        'longtitude',
+        'longitude',
     ];
 
     // Relasi dengan model lain jika ada

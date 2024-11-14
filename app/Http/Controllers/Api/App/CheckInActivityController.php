@@ -24,7 +24,7 @@ class CheckInActivityController extends Controller
     {
         $request->validate([
             'latitude' => 'required|numeric',
-            'longtitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
         ]);
 
         $user = Auth::user();
@@ -47,7 +47,7 @@ class CheckInActivityController extends Controller
                     'type' => 1,
                     'status' => 0, // status 0 untuk sukses
                     'latitude' => $request->latitude,
-                    'longtitude' => $request->longtitude,
+                    'longitude' => $request->longitude,
                 ]);
                 return response()->json([
                     'message' => 'Check-out berhasil',
@@ -70,9 +70,9 @@ class CheckInActivityController extends Controller
 
         $distance = $this->calculateDistance(
             $company->latitude,
-            $company->longtitude,
+            $company->longitude,
             $request->latitude,
-            $request->longtitude
+            $request->longitude
         );
 
         $distanceLimit = 1;
@@ -84,7 +84,7 @@ class CheckInActivityController extends Controller
                 'type' => 0,
                 'status' => 0, // status 0 untuk sukses
                 'latitude' => $request->latitude,
-                'longtitude' => $request->longtitude,
+                'longitude' => $request->longitude,
             ]);
             return response()->json([
                 'message' => 'Check-in berhasil',
@@ -98,7 +98,7 @@ class CheckInActivityController extends Controller
                 'type' => 0,
                 'status' => 1, // status 1 untuk gagal
                 'latitude' => $request->latitude,
-                'longtitude' => $request->longtitude,
+                'longitude' => $request->longitude,
             ]);
             return response()->json([
                 'message' => 'Check-in gagal, jarak terlalu jauh',
