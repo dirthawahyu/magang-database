@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->integer('status');
             $table->float('latitude');
             $table->float('longitude');
-            $table->text('photo');
+            $table->text('photo')->nullable();
             $table->timestamps();
 
             $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');

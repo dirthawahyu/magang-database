@@ -8,6 +8,9 @@ use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+
 
 class CheckInActivityController extends Controller
 {
@@ -123,4 +126,33 @@ class CheckInActivityController extends Controller
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
         return $earthRadius * $c;
     }
+
+    public function storeCheckInPhoto(Request $request, $activityId)
+    {
+        $request->validate([
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Validasi bahwa foto wajib diunggah dan harus berformat tertentu
+        ]);
+
+        // Temukan aktivitas check-in berdasarkan ID
+        $activity = CheckinActivity::find($activityId);
+
+        if (!$activity) {
+            return response()->json(['message' => 'Aktivitas check-in tidak ditemukan'], 404);
+        }
+
+        // Simpan foto ke storage
+        $file = $request->file('photo');
+        $filename = Str::random(40) . '.' . $file->getClientOriginalExtension();
+        $filePath = $file->storeAs('public/checkin_photos', $filename);
+
+        // Update aktivitas check-in dengan path foto
+        $activity->photo = $filename;
+        $activity->save();
+
+        return response()->json([
+            'message' => 'Foto berhasil disimpan',
+            'photo_url' => Storage::url('checkin_photos/' . $filename),
+        ], 200);
+    }
+
 }
