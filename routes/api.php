@@ -92,7 +92,6 @@ Route::middleware('auth:sanctum')->group(function () {
     //Check In
     Route::post('app/checkin', [CheckInActivityController::class, 'checkIn']);
     Route::get('app/checkin/today/{user}', [CheckinActivityController::class, 'getTodayActivities']);
-    Route::post('app/checkin/photo/{activityId}', [CheckinActivityController::class, 'storeCheckInPhoto']);
 
     //Otp
     Route::post('app/otp/send', [OtpController::class, 'sendOtp']);

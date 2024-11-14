@@ -28,6 +28,7 @@ class CheckInActivityController extends Controller
         $request->validate([
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validasi foto jika ada
         ]);
 
         $user = Auth::user();
@@ -43,12 +44,13 @@ class CheckInActivityController extends Controller
 
         if ($existingCheckin) {
             if ($existingCheckin->type == 0 && $existingCheckin->status == 0) {
+                // Check-out logic
                 $checkOutTime = now();
                 CheckinActivity::create([
                     'id_user' => $user->id,
                     'time' => $checkOutTime,
                     'type' => 1,
-                    'status' => 0, // status 0 untuk sukses
+                    'status' => 0,
                     'latitude' => $request->latitude,
                     'longitude' => $request->longitude,
                 ]);
@@ -78,36 +80,43 @@ class CheckInActivityController extends Controller
             $request->longitude
         );
 
-        $distanceLimit = 1;
+        $distanceLimit = 1; // 1 km sebagai batas jarak check-in
         $checkInTime = now();
-        if ($distance <= $distanceLimit) {
-            CheckinActivity::create([
-                'id_user' => $user->id,
-                'time' => $checkInTime,
-                'type' => 0,
-                'status' => 0, // status 0 untuk sukses
-                'latitude' => $request->latitude,
-                'longitude' => $request->longitude,
-            ]);
+        $status = $distance <= $distanceLimit ? 0 : 1; // status 0 untuk sukses, 1 untuk gagal
+
+        // Simpan aktivitas check-in
+        $checkInActivity = CheckinActivity::create([
+            'id_user' => $user->id,
+            'time' => $checkInTime,
+            'type' => 0,
+            'status' => $status,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+        ]);
+
+        $message = $status == 0 ? 'Check-in berhasil' : 'Check-in gagal, jarak terlalu jauh';
+
+        // Jika ada foto yang diunggah, simpan foto
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            $filename = Str::random(40) . '.' . $file->getClientOriginalExtension();
+            $filePath = $file->storeAs('public/checkin_photos', $filename);
+
+            // Update aktivitas check-in dengan path foto
+            $checkInActivity->photo = $filename;
+            $checkInActivity->save();
+
             return response()->json([
-                'message' => 'Check-in berhasil',
-                'check_in_time' => $checkInTime->format('H:i')
+                'message' => $message,
+                'check_in_time' => $checkInTime->format('H:i'),
+                'photo_url' => Storage::url('checkin_photos/' . $filename),
             ], 200);
-        } else {
-            // Jarak terlalu jauh, tetap insert namun dengan status 1
-            CheckinActivity::create([
-                'id_user' => $user->id,
-                'time' => $checkInTime,
-                'type' => 0,
-                'status' => 1, // status 1 untuk gagal
-                'latitude' => $request->latitude,
-                'longitude' => $request->longitude,
-            ]);
-            return response()->json([
-                'message' => 'Check-in gagal, jarak terlalu jauh',
-                'check_in_time' => $checkInTime->format('H:i')
-            ], 400);
         }
+
+        return response()->json([
+            'message' => $message,
+            'check_in_time' => $checkInTime->format('H:i'),
+        ], 200);
     }
 
 
@@ -125,34 +134,6 @@ class CheckInActivityController extends Controller
             sin($lonDiff / 2) * sin($lonDiff / 2);
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
         return $earthRadius * $c;
-    }
-
-    public function storeCheckInPhoto(Request $request, $activityId)
-    {
-        $request->validate([
-            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Validasi bahwa foto wajib diunggah dan harus berformat tertentu
-        ]);
-
-        // Temukan aktivitas check-in berdasarkan ID
-        $activity = CheckinActivity::find($activityId);
-
-        if (!$activity) {
-            return response()->json(['message' => 'Aktivitas check-in tidak ditemukan'], 404);
-        }
-
-        // Simpan foto ke storage
-        $file = $request->file('photo');
-        $filename = Str::random(40) . '.' . $file->getClientOriginalExtension();
-        $filePath = $file->storeAs('public/checkin_photos', $filename);
-
-        // Update aktivitas check-in dengan path foto
-        $activity->photo = $filename;
-        $activity->save();
-
-        return response()->json([
-            'message' => 'Foto berhasil disimpan',
-            'photo_url' => Storage::url('checkin_photos/' . $filename),
-        ], 200);
     }
 
 }
