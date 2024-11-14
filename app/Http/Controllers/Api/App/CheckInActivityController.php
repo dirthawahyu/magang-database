@@ -28,7 +28,7 @@ class CheckInActivityController extends Controller
         $request->validate([
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validasi foto jika ada
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $user = Auth::user();
@@ -44,7 +44,6 @@ class CheckInActivityController extends Controller
 
         if ($existingCheckin) {
             if ($existingCheckin->type == 0 && $existingCheckin->status == 0) {
-                // Check-out logic
                 $checkOutTime = now();
                 CheckinActivity::create([
                     'id_user' => $user->id,
@@ -82,7 +81,7 @@ class CheckInActivityController extends Controller
 
         $distanceLimit = 1; // 1 km sebagai batas jarak check-in
         $checkInTime = now();
-        $status = $distance <= $distanceLimit ? 0 : 1; // status 0 untuk sukses, 1 untuk gagal
+        $status = $distance <= $distanceLimit ? 0 : 1;
 
         // Simpan aktivitas check-in
         $checkInActivity = CheckinActivity::create([
@@ -96,7 +95,7 @@ class CheckInActivityController extends Controller
 
         $message = $status == 0 ? 'Check-in berhasil' : 'Check-in gagal, jarak terlalu jauh';
 
-        // Jika ada foto yang diunggah, simpan foto
+        $photoUrl = null;
         if ($request->hasFile('photo')) {
             $file = $request->file('photo');
             $filename = Str::random(40) . '.' . $file->getClientOriginalExtension();
@@ -106,18 +105,18 @@ class CheckInActivityController extends Controller
             $checkInActivity->photo = $filename;
             $checkInActivity->save();
 
-            return response()->json([
-                'message' => $message,
-                'check_in_time' => $checkInTime->format('H:i'),
-                'photo_url' => Storage::url('checkin_photos/' . $filename),
-            ], 200);
+            // Set URL foto untuk dikirim dalam response
+            $photoUrl = Storage::url('checkin_photos/' . $filename);
         }
 
         return response()->json([
             'message' => $message,
             'check_in_time' => $checkInTime->format('H:i'),
+            'photo_url' => $photoUrl, // Mengembalikan URL foto jika ada
         ], 200);
     }
+
+
 
 
     private function calculateDistance($lat1, $lon1, $lat2, $lon2)
