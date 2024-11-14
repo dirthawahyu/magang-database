@@ -42,27 +42,6 @@ class CheckInActivityController extends Controller
             ->orderBy('time', 'desc')
             ->first();
 
-        if ($existingCheckin) {
-            if ($existingCheckin->type == 0 && $existingCheckin->status == 0) {
-                // Check-out logic
-                $checkOutTime = now();
-                CheckinActivity::create([
-                    'id_user' => $user->id,
-                    'time' => $checkOutTime,
-                    'type' => 1,
-                    'status' => 0,
-                    'latitude' => $request->latitude,
-                    'longitude' => $request->longitude,
-                ]);
-                return response()->json([
-                    'message' => 'Check-out berhasil',
-                    'check_out_time' => $checkOutTime->format('H:i')
-                ], 200);
-            } else if ($existingCheckin->type == 1) {
-                return response()->json(['message' => 'Anda sudah melakukan check-out hari ini'], 400);
-            }
-        }
-
         $employee = Employee::where('id_user', $user->id)->first();
         if (!$employee) {
             return response()->json(['message' => 'Data employee tidak ditemukan'], 404);
@@ -80,8 +59,7 @@ class CheckInActivityController extends Controller
             $request->longitude
         );
 
-        $distanceLimit = 1; // 1 km sebagai batas jarak check-in
-        $checkInTime = now();
+        $distanceLimit = 1; // 1 km sebagai batas jarak check-in/check-out
         $status = $distance <= $distanceLimit ? 0 : 1; // status 0 untuk sukses, 1 untuk gagal
 
         // Jika ada foto, status dianggap berhasil meskipun jarak tidak sesuai
@@ -89,7 +67,88 @@ class CheckInActivityController extends Controller
             $status = 0; // Anggap berhasil jika ada foto
         }
 
-        // Simpan aktivitas check-in
+        // Jika ada check-in sebelumnya
+        if ($existingCheckin) {
+            if ($existingCheckin->type == 0 && $existingCheckin->status == 0) {
+                // Jika sudah melakukan check-in (status = 0), maka lakukan check-out
+                $checkOutTime = now();
+                $checkOutActivity = CheckinActivity::create([
+                    'id_user' => $user->id,
+                    'time' => $checkOutTime,
+                    'type' => 1, // Tipe check-out
+                    'status' => $status, // Status check-out (0 = sukses, 1 = gagal)
+                    'latitude' => $request->latitude,
+                    'longitude' => $request->longitude,
+                ]);
+
+                $message = $status == 0 ? 'Check-out berhasil' : 'Check-out gagal, jarak terlalu jauh';
+
+                // Jika ada foto yang diunggah, simpan foto untuk check-out
+                if ($request->hasFile('photo')) {
+                    $file = $request->file('photo');
+                    $filename = Str::random(40) . '.' . $file->getClientOriginalExtension();
+                    $filePath = $file->storeAs('public/checkin_photos', $filename);
+
+                    // Update aktivitas check-out dengan path foto
+                    $checkOutActivity->photo = $filename;
+                    $checkOutActivity->save();
+
+                    // Kirim URL foto dalam respons
+                    return response()->json([
+                        'message' => $message,
+                        'check_out_time' => $checkOutTime->format('H:i'),
+                        'photo_url' => Storage::url('checkin_photos/' . $filename),
+                    ], 200);
+                }
+
+                return response()->json([
+                    'message' => $message,
+                    'check_out_time' => $checkOutTime->format('H:i'),
+                ], 200);
+            } else if ($existingCheckin->type == 1 && $existingCheckin->status == 1) {
+                // Jika sebelumnya check-out gagal (status == 1), izinkan check-out lagi
+                $checkOutTime = now();
+                $checkOutActivity = CheckinActivity::create([
+                    'id_user' => $user->id,
+                    'time' => $checkOutTime,
+                    'type' => 1, // Tipe check-out
+                    'status' => $status, // Status check-out (0 = sukses, 1 = gagal)
+                    'latitude' => $request->latitude,
+                    'longitude' => $request->longitude,
+                ]);
+
+                $message = $status == 0 ? 'Check-out berhasil' : 'Check-out gagal, jarak terlalu jauh';
+
+                // Jika ada foto yang diunggah, simpan foto untuk check-out
+                if ($request->hasFile('photo')) {
+                    $file = $request->file('photo');
+                    $filename = Str::random(40) . '.' . $file->getClientOriginalExtension();
+                    $filePath = $file->storeAs('public/checkin_photos', $filename);
+
+                    // Update aktivitas check-out dengan path foto
+                    $checkOutActivity->photo = $filename;
+                    $checkOutActivity->save();
+
+                    // Kirim URL foto dalam respons
+                    return response()->json([
+                        'message' => $message,
+                        'check_out_time' => $checkOutTime->format('H:i'),
+                        'photo_url' => Storage::url('checkin_photos/' . $filename),
+                    ], 200);
+                }
+
+                return response()->json([
+                    'message' => $message,
+                    'check_out_time' => $checkOutTime->format('H:i'),
+                ], 200);
+            } else if ($existingCheckin->type == 1 && $existingCheckin->status == 0) {
+                // Jika sudah melakukan check-out dengan status sukses, beri pesan sudah check-out
+                return response()->json(['message' => 'Anda sudah melakukan check-out hari ini'], 400);
+            }
+        }
+
+        // Jika belum ada check-in sebelumnya, lanjutkan untuk check-in
+        $checkInTime = now();
         $checkInActivity = CheckinActivity::create([
             'id_user' => $user->id,
             'time' => $checkInTime,
