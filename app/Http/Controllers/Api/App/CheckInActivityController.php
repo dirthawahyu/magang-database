@@ -19,9 +19,11 @@ class CheckInActivityController extends Controller
         $today = Carbon::today();
         $activities = CheckinActivity::where('id_user', $user)
             ->whereDate('time', $today)
+            ->where('status', 0)
             ->get();
         return response()->json($activities);
     }
+
 
     public function checkIn(Request $request)
     {
