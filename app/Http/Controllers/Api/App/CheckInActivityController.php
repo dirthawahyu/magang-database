@@ -95,7 +95,9 @@ class CheckInActivityController extends Controller
 
                     // Kirim URL foto dalam respons
                     return response()->json([
+                        'status' => $status,
                         'message' => $message,
+                        'status' => $status,
                         'check_out_time' => $checkOutTime->format('H:i'),
                         'photo_url' => Storage::url('checkin_photos/' . $filename),
                     ], 200);
@@ -103,6 +105,7 @@ class CheckInActivityController extends Controller
 
                 return response()->json([
                     'message' => $message,
+                    'status' => $status,
                     'check_out_time' => $checkOutTime->format('H:i'),
                 ], 200);
             } else if ($existingCheckin->type == 1 && $existingCheckin->status == 1) {
@@ -132,6 +135,7 @@ class CheckInActivityController extends Controller
                     // Kirim URL foto dalam respons
                     return response()->json([
                         'message' => $message,
+                        'status' => $status,
                         'check_out_time' => $checkOutTime->format('H:i'),
                         'photo_url' => Storage::url('checkin_photos/' . $filename),
                     ], 200);
@@ -139,11 +143,15 @@ class CheckInActivityController extends Controller
 
                 return response()->json([
                     'message' => $message,
+                    'status' => $status,
                     'check_out_time' => $checkOutTime->format('H:i'),
                 ], 200);
             } else if ($existingCheckin->type == 1 && $existingCheckin->status == 0) {
                 // Jika sudah melakukan check-out dengan status sukses, beri pesan sudah check-out
-                return response()->json(['message' => 'Anda sudah melakukan check-out hari ini'], 400);
+                return response()->json([
+                    'message' => 'Anda sudah melakukan check-out hari ini',
+                    'status' => 1,
+                ], 400);
             }
         }
 
@@ -173,12 +181,14 @@ class CheckInActivityController extends Controller
             return response()->json([
                 'message' => $message,
                 'check_in_time' => $checkInTime->format('H:i'),
+                'status' => $status,
                 'photo_url' => Storage::url('checkin_photos/' . $filename),
             ], 200);
         }
 
         return response()->json([
             'message' => $message,
+            'status' => $status,
             'check_in_time' => $checkInTime->format('H:i'),
         ], 200);
     }
@@ -200,5 +210,4 @@ class CheckInActivityController extends Controller
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
         return $earthRadius * $c;
     }
-
 }
