@@ -85,13 +85,30 @@ class BusinessTripController extends Controller
         }
     }
 
-    public function getTripsStartingToday(): JsonResponse
+    public function getTripsStartingToday(Request $request): JsonResponse
     {
         try {
+            $userId = $request->user()->id;
+            $userRole = DB::table('employee')
+                ->where('id_user', $userId)
+                ->value('id_role');
+            $rolePriority = DB::table('role')
+                ->where('id', $userRole)
+                ->value('priority');
             $today = Carbon::now()->startOfDay();
-            $tripDetails = BusinessTrip::with(['companyCity.company', 'companyCity.city', 'users'])
-                ->whereDate('start_date', $today)
-                ->get();
+            if ($rolePriority < 3) {
+                $tripDetails = BusinessTrip::with(['companyCity.company', 'companyCity.city', 'users'])
+                    ->whereDate('start_date', $today)
+                    ->get();
+            } else {
+                $tripDetails = BusinessTrip::with(['companyCity.company', 'companyCity.city', 'users'])
+                    ->whereDate('start_date', $today)
+                    ->whereHas('users', function ($query) use ($userId) {
+                        $query->where('users.id', $userId);
+                    })
+                    ->get();
+            }
+            
             $formattedTripDetails = $tripDetails->map(function ($trip) {
                 return [
                     'id_business_trip' => $trip->id,
@@ -208,7 +225,7 @@ class BusinessTripController extends Controller
                 ->join('category_expenditure', 'planning_realization_header.id_category_expenditure', '=', 'category_expenditure.id')
                 ->select('id_category_expenditure', 'category_expenditure.name as category_expenditure_name', 'planning_realization_header.keterangan', 'planning_realization_header.nominal')
                 ->where('id_business_trip', $idBusinessTrip)
-                ->where('type', 1) 
+                ->where('type', 1)
                 ->get();
             return response()->json($planningData, 200);
         } catch (\Exception $e) {
@@ -246,7 +263,7 @@ class BusinessTripController extends Controller
                     'planning_realization_header.photo_proof'
                 )
                 ->where('planning_realization_header.id', $idRealizationHeader)
-                ->first(); 
+                ->first();
             if ($realizationData) {
                 return response()->json($realizationData, 200);
             } else {
@@ -270,10 +287,10 @@ class BusinessTripController extends Controller
             if ($request->hasFile('photo_proof')) {
                 $file = $request->file('photo_proof');
                 $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('public/photo_proofs', $filename); 
+                $file->storeAs('public/photo_proofs', $filename);
                 $validatedData['photo_proof'] = $filename;
             } else {
-                $validatedData['photo_proof'] = null; 
+                $validatedData['photo_proof'] = null;
             }
             $validatedData['type'] = 0;
             $id = DB::table('planning_realization_header')->insertGetId($validatedData);
@@ -350,7 +367,7 @@ class BusinessTripController extends Controller
                 $totalPlanning = DB::table('planning_realization_header')
                     ->where('id_business_trip', $id)
                     ->where('id_category_expenditure', $category->id_category_expenditure)
-                    ->where('type', 1) 
+                    ->where('type', 1)
                     ->sum(DB::raw('CAST(nominal AS DECIMAL(15,2))'));
                 $totalRealization = DB::table('planning_realization_header')
                     ->where('id_business_trip', $id)

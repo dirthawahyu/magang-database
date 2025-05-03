@@ -31,6 +31,7 @@ class OtpService
 
         // Ambil fullname dari user, sesuaikan dengan nama kolom di database
         $fullname = $user->full_name; // atau $user->fullname, sesuaikan dengan nama kolom
+        $email = $user->email;
 
         Log::info("OTP untuk user ID {$userId} adalah: {$otp}");
 
@@ -43,20 +44,20 @@ class OtpService
         ]);
 
         // Kirimkan OTP ke email user
-        $this->sendOtpEmail($fullname, $otp);
+        $this->sendOtpEmail($email, $fullname, $otp);
 
         return $otp;
     }
 
 
 
-    public function sendOtpEmail($fullname, $otp)
+    public function sendOtpEmail($email, $fullname, $otp)
     {
         $yourEmail = 'cillmystic@gmail.com';
 
         // Gunakan view untuk mengirim email
-        Mail::send('emails.otp', ['fullname' => $fullname, 'otp' => $otp], function ($message) use ($yourEmail) {
-            $message->to($yourEmail)
+        Mail::send('emails.otp', ['fullname' => $fullname, 'otp' => $otp], function ($message) use ($email) {
+            $message->to($email)
                 ->subject('Kode OTP Anda');
         });
     }
